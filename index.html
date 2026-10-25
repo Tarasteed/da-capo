@@ -376,7 +376,7 @@ const INST = {
 };
 
 /* ============ CATALOGUE ============ */
-let COMPOSERS = {}, ALL = [], PB = {}, P = [], CAT_OK = false;
+let COMPOSERS = {}, ALL = [], PB = {}, P = [], CAT_OK = false, SKIP = {};
 const DAY = 864e5, EPOCH = Date.UTC(2026, 9, 23);   // défi n°1 = 23 octobre 2026
 const today = new Date();
 const todayKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
@@ -401,6 +401,8 @@ async function loadCatalog() {
     e: p.y ? eraOf(p.y) : COMPOSERS[p.c][4]
   }));
   PB = Object.fromEntries(ALL.map(p => [p.id, p]));
+  // catalog.daily_skip = {"YYYY-MM-DD": [ids]}: extracts kept out of that day's challenge (they come back the next days)
+  SKIP = Object.fromEntries(Object.entries(c.daily_skip || {}).map(([k, ids]) => [dayOf(k), new Set(ids)]));
   P = ALL.filter(p => avail(p, dayNo));
   CAT_OK = P.length >= 5;
 }
@@ -556,12 +558,13 @@ function dailyRounds(n) {
     day = [];
     const okC = id => !day.some(x => x === id || PB[x].c === PB[id].c);
     const okG = id => last[id] == null || d - last[id] >= gap;
+    const okS = id => !(SKIP[d] && SKIP[d].has(id));
     let guard = 0;
     while (day.length < 5 && guard++ < 50) {
       if (deck.length < 10) refill();
-      let i = deck.findIndex(id => okC(id) && okG(id));
-      if (i < 0) { refill(); i = deck.findIndex(id => okC(id) && okG(id)); }
-      if (i < 0) i = deck.findIndex(id => !day.includes(id));
+      let i = deck.findIndex(id => okS(id) && okC(id) && okG(id));
+      if (i < 0) { refill(); i = deck.findIndex(id => okS(id) && okC(id) && okG(id)); }
+      if (i < 0) i = deck.findIndex(id => okS(id) && !day.includes(id));
       if (i < 0) break;
       const id = deck.splice(i, 1)[0]; day.push(id); last[id] = d;
     }

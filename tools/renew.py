@@ -465,7 +465,10 @@ def fmt_catalog(path):
     L += [f'  {json.dumps(k)}: {json.dumps(c["composers"][k], ensure_ascii=False)}' + ("," if i < len(ks) - 1 else "") for i, k in enumerate(ks)]
     L += [" },", ' "pieces": [']
     L += ["  " + json.dumps(x, ensure_ascii=False) + ("," if i < len(c["pieces"]) - 1 else "") for i, x in enumerate(c["pieces"])]
-    L += [" ]", "}"]
+    extra = [k for k in c if k not in ("updated", "epoch", "composers", "pieces")]
+    L += [" ]" + ("," if extra else "")]
+    L += [f' {json.dumps(k)}: {json.dumps(c[k], ensure_ascii=False)}' + ("," if i < len(extra) - 1 else "") for i, k in enumerate(extra)]
+    L += ["}"]
     open(path, "w", encoding="utf-8").write("\n".join(L) + "\n")
 
 def check(args):
