@@ -857,7 +857,7 @@ $("#pp").addEventListener("click", () => {
   if (cur) stopAudio(); else playClip(p.id, startTimerIfNeeded);
 });
 document.addEventListener("keydown", e => {
-  if (playEl.hidden || e.target.closest("input,textarea") || e.metaKey || e.ctrlKey || e.altKey) return;
+  if (playEl.hidden || e.target.closest("input:not([type=range]),textarea") || e.metaKey || e.ctrlKey || e.altKey) return;
   if (e.key === " " && e.target === document.body) { e.preventDefault(); $("#pp").click(); }
   if (e.key === "Enter" && G.phase === "q" && (G.mode === "blind" || G.mode === "daily") && !e.target.closest("button")) { e.preventDefault(); blindReveal(); }
   if (G.phase === "q" && /^[1-4]$/.test(e.key) && G.mode !== "year") {
