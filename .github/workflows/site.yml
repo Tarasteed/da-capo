@@ -1,0 +1,93 @@
+name: Da capo
+
+# - Chaque dimanche : ajoute les prochains extraits de queue.json (en jeu dès lundi), fait tourner
+#   le catalogue, puis met le site en ligne.
+# - À chaque push sur main : remet simplement le site en ligne.
+# - « Run workflow » dans l'onglet Actions : lance un renouvellement à la main.
+on:
+  schedule:
+    - cron: "17 17 * * 0"   # dimanche 17 h 17 UTC (18 h 17 à Paris l'hiver, 19 h 17 l'été)
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      count:
+        description: "Nombre de nouveaux extraits (0 = automatique : 50 tant qu'il y a moins de 100 vrais enregistrements, puis 25)"
+        default: "0"
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: da-capo
+  cancel-in-progress: false
+
+jobs:
+  site:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      # Les fichiers audio vivent sur une branche à part, réécrite en un seul commit chaque semaine,
+      # pour que l'historique du dépôt ne grossisse pas indéfiniment.
+      - uses: actions/checkout@v4
+        with:
+          ref: audio
+          path: audio
+
+      - name: Préparer Python
+        if: github.event_name != 'push'
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: tools/requirements.txt
+
+      - name: Ajouter les nouveaux extraits
+        if: github.event_name != 'push'
+        env:
+          COUNT: ${{ github.event.inputs.count || '0' }}
+        run: |
+          pip install -q -r tools/requirements.txt
+          python tools/renew.py release --catalog catalog.json --queue queue.json --audio-dir audio --count "$COUNT"
+          python tools/renew.py check --catalog catalog.json --audio-dir audio
+
+      - name: Enregistrer dans le dépôt
+        if: github.event_name != 'push'
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          cd audio
+          git add -A
+          git commit -q --amend -m "Extraits audio en jeu ($(date -u +%F))"
+          git push -q --force origin HEAD:audio
+          cd ..
+          git add catalog.json queue.json
+          if ! git diff --cached --quiet; then
+            git commit -q -m "Renouvellement du $(date -u +%F)"
+            git pull -q --rebase origin main
+            git push -q origin HEAD:main
+          fi
+
+      - name: Assembler le site
+        run: |
+          mkdir -p _site/audio
+          cp index.html catalog.json _site/
+          cp audio/*.mp3 _site/audio/
+          touch _site/.nojekyll
+          echo "$(ls _site/audio | wc -l) fichiers audio, $(du -sh _site | cut -f1) au total"
+
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+      - id: deploy
+        uses: actions/deploy-pages@v4

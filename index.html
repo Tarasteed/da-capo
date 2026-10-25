@@ -1,0 +1,933 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="Le blind test de la musique classique : de vrais enregistrements libres de droits, renouvelés chaque semaine. Reconnaissez le compositeur, le titre, l’année ou l’instrument.">
+<meta property="og:title" content="Da capo, le blind test de la musique classique">
+<meta property="og:description" content="Écoutez, reconnaissez, découvrez l’histoire de chaque œuvre. Un défi chaque jour.">
+<meta name="theme-color" content="#0E1118">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='30' fill='%230E1118'/%3E%3Ccircle cx='32' cy='32' r='12' fill='%23E3AE45'/%3E%3Ccircle cx='32' cy='32' r='3' fill='%230E1118'/%3E%3C/svg%3E">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Da capo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..800;1,9..144,400..800&family=DM+Mono:wght@400;500&family=Atkinson+Hyperlegible+Next:ital,wght@0,200..800;1,200..800&display=swap">
+<style>
+/* Layout: a concert stage at night. One dark world; the four musical eras are the only colours,
+   used as full-bleed floods when an answer is revealed and as the mode cards on the home screen. */
+:root{
+  color-scheme:dark;
+  --bg:#0E1118; --bg-2:#151A23; --bg-3:#1E2431; --fg:#F2F4F7; --fg-2:#C6CCD6; --fg-3:#99A1B0; --rule:#283041;
+  --B:#E3AE45; --C:#86ACEC; --R:#F27A92; --M:#45C6A9;
+  --fB:#7A4F05; --fC:#204C8A; --fR:#8A1E37; --fM:#0C574A;
+  --good:#4CC27E; --bad:#F0716A; --ink-on:#10131A;
+  --vinyl-a:#14171E; --vinyl-b:#0A0C11;
+  --f-display:"Fraunces",Georgia,"Times New Roman",serif;
+  --f-body:"Atkinson Hyperlegible Next","Helvetica Neue",Arial,sans-serif;
+  --f-mono:"DM Mono",ui-monospace,"SF Mono",Menlo,monospace;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:17px;line-height:1.5;-webkit-font-smoothing:antialiased;transition:background-color .55s ease}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:20;background:var(--bg)}
+.wrap{max-width:72rem;margin-inline:auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+h1,h2,h3{margin:0;font-weight:500;text-wrap:balance}
+p{margin:0}
+button{font-family:inherit;color:inherit}
+a{color:inherit;text-underline-offset:.18em}
+:focus-visible{outline:2px solid var(--fg);outline-offset:3px}
+.eyebrow{font:500 13px var(--f-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--fg-2)}
+.e-B{--era:var(--B);--flood:var(--fB)} .e-C{--era:var(--C);--flood:var(--fC)} .e-R{--era:var(--R);--flood:var(--fR)} .e-M{--era:var(--M);--flood:var(--fM)}
+.dot{width:.6rem;height:.6rem;border-radius:50%;background:var(--era);display:inline-block;flex:none}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.5em;font:600 15px/1 var(--f-body);padding:.85rem 1.25rem;border-radius:999px;border:1.5px solid currentColor;background:transparent;color:inherit;cursor:pointer;text-decoration:none;white-space:nowrap;transition:transform .15s ease}
+.btn:hover{transform:translateY(-1px)}
+.btn.solid{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+.btn.dark{background:var(--ink-on);color:var(--fg);border-color:var(--ink-on)}
+.btn[disabled]{opacity:.4;cursor:default;transform:none}
+
+/* ---------- top ---------- */
+.top{display:flex;justify-content:space-between;align-items:center;gap:1rem;padding-block:1rem}
+.mark{font-family:var(--f-display);font-style:italic;font-size:1.55rem;font-weight:600;background:none;border:0;padding:0;cursor:pointer;line-height:1}
+.pill{font:13px var(--f-mono);letter-spacing:.04em;border:1px solid var(--rule);border-radius:999px;padding:.45rem .8rem;background:var(--bg-2);cursor:pointer;color:var(--fg-2)}
+.pill b{color:var(--fg);font-weight:500}
+
+/* ---------- home ---------- */
+.hero{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:2.5rem;align-items:center;padding-block:1.5rem 3rem}
+.title{font-family:var(--f-display);font-style:italic;font-weight:600;font-size:clamp(4.2rem,12.5vw,9rem);line-height:.88;letter-spacing:-.025em;margin:.6rem 0 1.1rem}
+.lede{font-size:1.15rem;color:var(--fg-2);max-width:34rem}
+.fresh{display:flex;flex-wrap:wrap;gap:.4rem .6rem;margin-top:1rem;font:500 13px var(--f-mono);color:var(--fg-2)}
+.fresh span{border:1px solid var(--rule);border-radius:999px;padding:.3rem .65rem;background:var(--bg-2)}
+.fresh b{color:var(--fg);font-weight:500}
+.daily{margin-top:1.6rem;background:var(--B);color:var(--ink-on);border-radius:18px;padding:1.3rem 1.4rem;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:.4rem 1.2rem;align-items:center;max-width:34rem}
+.daily .k{font:500 13px var(--f-mono);letter-spacing:.08em;text-transform:uppercase;opacity:.85}
+.daily h2{font-family:var(--f-display);font-style:italic;font-size:2rem;line-height:1.05;font-weight:600}
+.daily p{font-size:.95rem;opacity:.9}
+.daily .btn{grid-row:1/span 3;grid-column:2}
+.record-wrap{display:grid;place-items:center}
+.record{width:min(76vw,23rem);aspect-ratio:1;max-width:100%;border-radius:50%;position:relative;
+  background:repeating-radial-gradient(circle at 50% 50%,var(--vinyl-a) 0 2px,var(--vinyl-b) 2px 4px);
+  box-shadow:0 0 0 1px var(--rule),0 30px 80px rgb(0 0 0 / .55);animation:spin 9s linear infinite}
+.record::before{content:"";position:absolute;inset:31%;border-radius:50%;background:conic-gradient(var(--B) 0 25%,var(--C) 0 50%,var(--R) 0 75%,var(--M) 0)}
+.record::after{content:"";position:absolute;inset:48.5%;border-radius:50%;background:var(--bg)}
+.record span{position:absolute;inset:0;display:grid;place-items:center;font-family:var(--f-display);font-style:italic;font-weight:700;font-size:clamp(1rem,3.4vw,1.5rem);color:var(--ink-on);z-index:1;transform:translateY(-1.6em)}
+@keyframes spin{to{transform:rotate(360deg)}}
+.modes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1rem;padding-block:1rem 3rem}
+.mode{border-radius:18px;padding:1.4rem 1.4rem 1.3rem;color:var(--ink-on);background:var(--era);display:grid;gap:.6rem;align-content:start;text-align:left;border:0;cursor:pointer;min-height:15rem;transition:transform .15s ease}
+.mode:hover:not([disabled]){transform:translateY(-3px)}
+.mode[disabled]{opacity:.55;cursor:default}
+.mode .k{font:500 13px var(--f-mono);letter-spacing:.08em;text-transform:uppercase;opacity:.85}
+.mode h3{font-family:var(--f-display);font-style:italic;font-size:2.3rem;font-weight:600;line-height:1}
+.mode p{font-size:1rem;line-height:1.45;font-weight:500}
+.mode .go{margin-top:auto;font-weight:700;display:flex;justify-content:space-between;align-items:center;padding-top:.8rem;border-top:1.5px solid rgb(16 19 26 / .25)}
+.mode .best{font:500 13px var(--f-mono);opacity:.85}
+.sec-h{display:flex;justify-content:space-between;align-items:end;gap:1rem;flex-wrap:wrap;border-top:1px solid var(--rule);padding-top:2rem;margin-bottom:1.2rem}
+.sec-h h2{font-family:var(--f-display);font-size:2.2rem;font-weight:600}
+.sec-h p{color:var(--fg-2);max-width:36rem}
+.prog{height:6px;background:var(--bg-3);border-radius:3px;overflow:hidden;width:min(18rem,100%);margin-top:.5rem}
+.prog i{display:block;height:100%;background:var(--fg);border-radius:3px}
+.disco{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,10.5rem),1fr));gap:.6rem;padding-bottom:1rem}
+.tile{border:1px solid var(--rule);background:var(--bg-2);border-radius:12px;padding:.8rem .85rem;text-align:left;cursor:pointer;display:grid;gap:.35rem;align-content:start;min-height:7.2rem;position:relative;overflow:hidden}
+.tile::before{content:"";position:absolute;inset:0 auto 0 0;width:4px;background:var(--era)}
+.tile .y{font:13px var(--f-mono);color:var(--fg-2)}
+.tile .t{font-family:var(--f-display);font-size:1.08rem;line-height:1.2;font-weight:600}
+.tile .c{font-size:.88rem;color:var(--fg-2)}
+.tile:hover{border-color:var(--era)}
+.empty{color:var(--fg-2);border:1px dashed var(--rule);border-radius:12px;padding:1.2rem;grid-column:1/-1}
+.about{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:2.5rem;border-top:1px solid var(--rule);padding-block:2rem 3rem;margin-top:2rem;font-size:.95rem;color:var(--fg-2)}
+.about h3{font:500 13px var(--f-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--fg);margin-bottom:.8rem}
+.about p+p{margin-top:.7rem}
+.about ol{margin:0;padding-left:1.2rem;display:grid;gap:.5rem}
+
+/* ---------- play ---------- */
+#play{min-height:100dvh;padding-bottom:3rem}
+body.flooded,body.flooded::before{background:var(--flood)}
+.play-bar{display:flex;align-items:center;gap:1rem;flex-wrap:wrap;padding-block:1rem;border-bottom:1px solid var(--rule)}
+body.flooded .play-bar{border-color:rgb(255 255 255 / .2)}
+.play-bar .mode-n{font-family:var(--f-display);font-style:italic;font-size:1.4rem;font-weight:600}
+.play-bar .stat{font:500 13px var(--f-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--fg-2)}
+.play-bar .stat b{color:var(--fg);font-weight:500;font-size:15px}
+.play-bar .sp{flex:1}
+.quit{background:none;border:1px solid var(--rule);border-radius:999px;padding:.45rem .8rem;font:14px var(--f-body);cursor:pointer}
+body.flooded .quit,body.flooded .pill{border-color:rgb(255 255 255 / .35);background:transparent}
+.play-grid{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:3rem;align-items:center;padding-top:2.2rem}
+.deck{display:grid;justify-items:center;gap:.9rem}
+.platter{position:relative;width:min(70vw,21rem);aspect-ratio:1;max-width:100%}
+.platter canvas{position:absolute;inset:0;width:100%;height:100%}
+.platter svg.ring{position:absolute;inset:0;width:100%;height:100%;transform:rotate(-90deg)}
+.ring .bgc{fill:none;stroke:var(--rule);stroke-width:3}
+.ring .fgc{fill:none;stroke:var(--fg);stroke-width:3;stroke-linecap:round;transition:stroke .3s}
+.ring .fgc.low{stroke:var(--bad)}
+.pp{position:absolute;left:50%;top:50%;width:30%;aspect-ratio:1;transform:translate(-50%,-50%);border-radius:50%;border:0;background:var(--fg);color:var(--bg);cursor:pointer;display:grid;place-items:center;box-shadow:0 10px 30px rgb(0 0 0 / .4)}
+.pp svg{width:38%;height:38%;fill:currentColor}
+.deck-cap{font:500 15px var(--f-body);color:var(--fg-2);text-align:center;min-height:1.3em}
+body.flooded .deck-cap,body.flooded .play-bar .stat{color:rgb(255 255 255 / .85)}
+.q{display:grid;gap:1.4rem;min-width:0}
+.q-h{font-family:var(--f-display);font-weight:600;font-size:clamp(1.7rem,3.4vw,2.4rem);line-height:1.12}
+.q-sub{font:500 13px var(--f-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--fg-2);margin-bottom:.55rem;display:flex;justify-content:space-between;gap:1rem}
+.choices{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.55rem}
+.choice{border:1.5px solid var(--rule);background:var(--bg-2);border-radius:14px;padding:.8rem .95rem;text-align:left;cursor:pointer;display:grid;gap:.15rem;min-height:3.6rem;align-content:center;transition:border-color .15s,background-color .15s,transform .1s}
+.choice:hover:not([disabled]){border-color:var(--fg-2)}
+.choice:active:not([disabled]){transform:scale(.98)}
+.choice .n{font-weight:600;font-size:1.06rem;line-height:1.25}
+.choice .d{font:13px var(--f-mono);color:var(--fg-2)}
+.choice.picked{border-color:var(--fg);background:var(--bg-3)}
+.choice[disabled]{cursor:default}
+.kbd{font:12px var(--f-mono);color:var(--fg-2);border:1px solid var(--rule);border-radius:4px;padding:0 .3rem;margin-right:.35rem}
+.reveal{display:grid;gap:1rem;min-width:0}
+.pts{font-family:var(--f-display);font-weight:600;font-size:clamp(4.5rem,11vw,7rem);line-height:.9;font-variant-numeric:lining-nums tabular-nums;letter-spacing:-.02em}
+.pts small{font-size:.3em;font-weight:500;opacity:.75;letter-spacing:0}
+.marks{display:flex;flex-wrap:wrap;gap:.4rem}
+.mk{font:500 14px var(--f-body);padding:.32rem .7rem;border-radius:999px;background:rgb(255 255 255 / .12)}
+.mk.ok{background:var(--good);color:var(--ink-on)}
+.mk.no{background:rgb(0 0 0 / .28)}
+.card{background:rgb(0 0 0 / .22);border-radius:16px;padding:1.2rem 1.3rem;display:grid;gap:.55rem}
+.card .t{font-family:var(--f-display);font-size:clamp(1.5rem,3vw,2rem);line-height:1.12;font-weight:600}
+.card .meta{font:13.5px var(--f-mono);opacity:.92;display:flex;flex-wrap:wrap;gap:.2rem .9rem}
+.card .fact{line-height:1.5}
+.card .stat-l{font-size:.92rem;border-top:1px solid rgb(255 255 255 / .2);padding-top:.55rem;opacity:.92}
+.card .stat-l b{font-family:var(--f-mono);font-weight:500;font-size:12px;letter-spacing:.08em;text-transform:uppercase;margin-right:.4rem;opacity:.85}
+.credit{font-size:.85rem;opacity:.85;line-height:1.45}
+.actions{display:flex;flex-wrap:wrap;gap:.6rem}
+.sum{list-style:none;margin:0;padding:0;display:grid}
+.sum li{display:grid;grid-template-columns:1.2rem minmax(0,1fr) auto;gap:.7rem;align-items:center;padding:.5rem 0;border-bottom:1px solid var(--rule);font-size:.95rem}
+.sum .sq{width:1rem;height:1rem;border-radius:3px}
+.sum .p{font:500 14px var(--f-mono);font-variant-numeric:tabular-nums}
+.sum small{color:var(--fg-2)}
+.sq1{background:var(--good)} .sq2{background:var(--B)} .sq3{background:var(--bad)}
+.share{width:100%;font:13px var(--f-mono);background:var(--bg-2);color:var(--fg);border:1px solid var(--rule);border-radius:10px;padding:.7rem;min-height:6rem}
+.note{font-size:.92rem;color:var(--fg-2)}
+.q-foot{display:flex;align-items:center;flex-wrap:wrap;gap:.6rem 1rem}
+.q-foot .hint{font-size:.92rem;color:var(--fg-2);flex:1 1 14rem;min-width:0}
+.err{color:var(--bad);font-size:.95rem}
+
+/* dial */
+.dial-box{position:relative;width:min(84vw,24rem);max-width:100%}
+#dial{width:100%;height:auto;display:block;touch-action:none;cursor:grab;outline:none}
+#dial:focus-visible{outline:2px solid var(--fg);outline-offset:6px;border-radius:50%}
+#dial.locked{cursor:default}
+.dial-center{position:absolute;left:50%;top:45%;transform:translate(-50%,-50%);text-align:center;pointer-events:none;display:grid;gap:.2rem}
+.dial-center output{font-family:var(--f-display);font-weight:600;font-size:clamp(3rem,9vw,4.3rem);line-height:1;font-variant-numeric:lining-nums tabular-nums}
+.dial-center span{font:500 12px var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--fg-2)}
+.fine{display:flex;justify-content:center;gap:.4rem;flex-wrap:wrap}
+.fine button{font:500 13px var(--f-mono);padding:.5rem .8rem;border:1px solid var(--rule);background:transparent;border-radius:999px;cursor:pointer}
+.fine button[disabled]{opacity:.35;cursor:default}
+.d-ring{fill:none;stroke:var(--rule);stroke-width:1}
+.d-tick{stroke:var(--fg-3);stroke-width:1}
+.d-tick.maj{stroke:var(--fg);stroke-width:1.6}
+.d-lab{fill:var(--fg-2);font:500 12.5px var(--f-mono);text-anchor:middle;dominant-baseline:middle}
+.d-era{fill:none;stroke-width:7}
+.de-B{stroke:var(--B)} .de-C{stroke:var(--C)} .de-R{stroke:var(--R)} .de-M{stroke:var(--M)}
+.needle{stroke:var(--fg);stroke-width:3;stroke-linecap:round}
+.knob{fill:var(--fg)}
+.ghost{opacity:.45}
+.truth-n{stroke:var(--fg);stroke-width:4;stroke-linecap:round}
+.truth-k{fill:var(--fg)}
+.gap-arc{fill:none;stroke:var(--fg);stroke-width:5;opacity:.4}
+.legend{display:flex;justify-content:center;flex-wrap:wrap;gap:.3rem .9rem;font:500 12px var(--f-mono);letter-spacing:.04em;text-transform:uppercase;color:var(--fg-2)}
+.legend span{display:inline-flex;align-items:center;gap:.35rem}
+
+/* modal */
+.modal{position:fixed;inset:0;z-index:30;background:rgb(5 7 10 / .72);display:grid;place-items:center;padding:max(16px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) max(16px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+.sheet{width:min(34rem,100%);max-height:100%;overflow:auto;background:var(--flood);border-radius:20px;padding:1.4rem 1.4rem 1.3rem;display:grid;gap:.9rem;box-shadow:0 30px 90px rgb(0 0 0 / .6)}
+.sheet-top{display:flex;justify-content:space-between;align-items:center;gap:1rem}
+.x{background:rgb(0 0 0 / .25);border:0;border-radius:999px;width:2.3rem;height:2.3rem;cursor:pointer;font-size:1.2rem}
+
+@media (max-width:860px){
+  .hero,.play-grid,.about{grid-template-columns:minmax(0,1fr)}
+  .record{width:min(56vw,15rem)}
+  .modes{grid-template-columns:minmax(0,1fr)}
+  .mode{min-height:0}
+  .play-grid{gap:1.6rem;padding-top:1.4rem}
+  .platter{width:min(46vw,13rem)}
+}
+@media (max-width:520px){
+  .choice{padding:.65rem .7rem;min-height:3.2rem;border-radius:12px}
+  .choice .n{font-size:1rem}
+  .q{gap:1.1rem}
+  .daily{grid-template-columns:minmax(0,1fr)}
+  .daily .btn{grid-row:auto;grid-column:auto;justify-self:start;margin-top:.5rem}
+  .kbd{display:none}
+}
+@media (prefers-reduced-motion: reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+<div class="wrap top">
+  <button class="mark" id="home-btn" type="button" aria-label="Accueil">Da capo</button>
+  <button class="pill" id="disco-pill" type="button">Discothèque <b id="disco-count">0</b></button>
+</div>
+
+<main id="home">
+  <div class="wrap">
+    <section class="hero">
+      <div>
+        <p class="eyebrow">Le blind test de la musique classique</p>
+        <h1 class="title">Da capo</h1>
+        <p class="lede">Des œuvres célèbres, du baroque au XXe siècle. Écoutez, reconnaissez, et découvrez l’histoire de chaque morceau. Montez le son.</p>
+        <p class="fresh" id="fresh"></p>
+        <div class="daily" id="daily"><p class="k">Défi du jour</p><h2>Chargement…</h2><p>Préparation du catalogue d’extraits.</p></div>
+      </div>
+      <div class="record-wrap" aria-hidden="true"><div class="record"><span>Da capo</span></div></div>
+    </section>
+
+    <section class="modes" aria-label="Modes de jeu">
+      <button class="mode e-R" type="button" data-mode="blind" disabled>
+        <span class="k">8 extraits · à votre rythme</span>
+        <h3>Blind test</h3>
+        <p>Qui a composé ce morceau ? Et quel est son titre ? Répondez vite pour gagner un bonus, ou prenez votre temps.</p>
+        <span class="go">Jouer →<span class="best" data-best="blind"></span></span>
+      </button>
+      <button class="mode e-B" type="button" data-mode="year" disabled>
+        <span class="k">5 extraits · un cadran</span>
+        <h3>L’année</h3>
+        <p>Tournez le cadran jusqu’à l’année de composition. Pile dans le mille : 10 points. À cinquante ans près : 4 environ.</p>
+        <span class="go">Jouer →<span class="best" data-best="year"></span></span>
+      </button>
+      <button class="mode e-M" type="button" data-mode="inst" disabled>
+        <span class="k">6 extraits · qui joue ?</span>
+        <h3>L’instrument</h3>
+        <p>Piano seul ou orchestre ? Violon ou violoncelle ? Quatuor à cordes ? Reconnaissez qui joue.</p>
+        <span class="go">Jouer →<span class="best" data-best="inst"></span></span>
+      </button>
+    </section>
+
+    <section id="disco-sec" aria-label="Discothèque">
+      <div class="sec-h">
+        <div>
+          <h2>Ma discothèque</h2>
+          <div class="prog"><i id="disco-bar" style="width:0%"></i></div>
+        </div>
+        <p id="disco-txt">Chaque œuvre entendue en jeu rejoint votre discothèque, avec son histoire. Touchez une œuvre pour la réécouter.</p>
+      </div>
+      <div class="disco" id="disco"></div>
+    </section>
+
+    <section class="about">
+      <div>
+        <h3>Comment c’est fait</h3>
+        <p>Les extraits viennent d’enregistrements libres de droits, publiés notamment par Musopen sur Internet Archive et Wikimedia Commons. L’interprète, la source et la licence sont indiqués après chaque réponse. Chaque extrait dure environ 25 secondes : un programme repère dans le mouvement un passage bien audible, qui revient au cours de l’œuvre, souvent le thème principal.</p>
+        <p>Le catalogue se renouvelle tout seul chaque semaine : de nouveaux enregistrements entrent, les plus anciens finissent par sortir. Tant qu’un thème n’a pas encore d’enregistrement libre, il reste dans une version synthétisée, signalée comme telle.</p>
+        <p>Le défi du jour distribue les extraits dans un ordre mélangé, cinq par jour, avec cinq compositeurs différents : aucun ne revient avant que tous soient passés. Les parties libres proposent d’abord les œuvres que vous n’avez pas encore entendues.</p>
+        <p>Les dates sont celles de l’achèvement ou de la publication ; « vers » signale une date incertaine. Les classements de popularité viennent des statistiques Bachtrack. Vos scores et votre discothèque restent dans ce navigateur.</p>
+      </div>
+      <div>
+        <h3>Sources</h3>
+        <ol>
+          <li><a href="https://archive.org/details/musopen" target="_blank" rel="noopener">Internet Archive, collection Musopen</a></li>
+          <li><a href="https://commons.wikimedia.org/wiki/Category:Musopen" target="_blank" rel="noopener">Wikimedia Commons, enregistrements Musopen</a></li>
+          <li><a href="https://bachtrack.com/fr_FR/classical-music-statistics-2025" target="_blank" rel="noopener">Bachtrack, statistiques 2025 de la musique classique</a></li>
+          <li><a href="https://cdn.bachtrack.com/files/467512-FR%20Annual%20classical%20music%20statistics%202025.pdf" target="_blank" rel="noopener">Bachtrack, infographie 2025 (PDF)</a></li>
+          <li><a href="https://github.com/mrbumpy409/GeneralUser-GS" target="_blank" rel="noopener">GeneralUser GS, banque de sons des versions synthétisées</a></li>
+        </ol>
+      </div>
+    </section>
+  </div>
+</main>
+
+<section id="play" hidden aria-live="polite">
+  <div class="wrap">
+    <div class="play-bar">
+      <button class="quit" id="quit" type="button">← Quitter</button>
+      <span class="mode-n" id="p-mode">Blind test</span>
+      <span class="sp"></span>
+      <span class="stat">Manche <b id="p-round">1/8</b></span>
+      <span class="stat">Score <b id="p-score">0</b></span>
+    </div>
+    <div class="play-grid">
+      <div class="deck">
+        <div class="platter" id="platter">
+          <canvas id="viz"></canvas>
+          <svg class="ring" viewBox="0 0 100 100" aria-hidden="true"><circle class="bgc" cx="50" cy="50" r="48.5"></circle><circle class="fgc" id="ring" cx="50" cy="50" r="48.5" pathLength="100" stroke-dasharray="100" stroke-dashoffset="0"></circle></svg>
+          <button class="pp" id="pp" type="button" aria-label="Écouter"></button>
+        </div>
+        <p class="deck-cap" id="deck-cap"></p>
+      </div>
+      <div class="q" id="q"></div>
+    </div>
+  </div>
+</section>
+
+<div class="modal" id="modal" hidden role="dialog" aria-modal="true" aria-labelledby="m-title"></div>
+
+<script>
+(() => {
+"use strict";
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const NB = " ", NNB = " ";
+const frText = s => s.replace(/(\d) (\d{3})(?!\d)/g, "$1" + NNB + "$2").replace(/ ([;!?])/g, NNB + "$1").replace(/ ([:»])/g, NB + "$1").replace(/« /g, "«" + NB);
+const fr = s => String(s).split(/(<[^>]*>)/).map(part => part.charAt(0) === "<" ? part : frText(part)).join("");
+const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, ch => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch]));
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const RM = matchMedia("(prefers-reduced-motion: reduce)").matches;
+const store = {
+  get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
+  set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+};
+const ERA = { B: "Baroque", C: "Classique", R: "Romantique", M: "XXe siècle" };
+const eraOf = y => y < 1750 ? "B" : y < 1820 ? "C" : y < 1900 ? "R" : "M";
+
+/* Who plays: solo instruments and ensembles. The catalogue's `form` field uses these keys.
+   [label, family, what to know, family code] */
+const INST = {
+  violon:["Violon","Cordes frottées","Le plus aigu de la famille des cordes. Un orchestre symphonique en compte souvent une trentaine, répartis en premiers et seconds violons.","str"],
+  alto:["Alto","Cordes frottées","Un peu plus grand que le violon, il joue une quinte plus bas. Il se lit dans une clé presque réservée à lui, la clé d’ut troisième ligne.","str"],
+  violoncelle:["Violoncelle","Cordes frottées","Il se joue assis, posé au sol sur une pique. Sa tessiture couvre celle de la voix humaine, de la basse au ténor.","str"],
+  contrebasse:["Contrebasse","Cordes frottées","La plus grave des cordes frottées. Elle sonne une octave plus bas que les notes écrites sur sa partition.","str"],
+  guitare:["Guitare","Cordes pincées","Six cordes pincées avec les doigts. Au XIXe siècle, Fernando Sor et Francisco Tárrega en font un instrument de concert.","str"],
+  harpe:["Harpe","Cordes pincées","La harpe de concert a 47 cordes et sept pédales qui changent l’accord de chaque note.","str"],
+  flute:["Flûte traversière","Bois sans anche","Classée parmi les bois même quand elle est en métal : le son naît du souffle qui se brise sur le bord de l’embouchure.","win"],
+  hautbois:["Hautbois","Bois à anche double","C’est lui qui donne le la à tout l’orchestre au moment de s’accorder.","win"],
+  coranglais:["Cor anglais","Bois à anche double","Ni cor, ni anglais : c’est un hautbois plus grave, au pavillon en forme de poire.","win"],
+  clarinette:["Clarinette","Bois à anche simple","Inventée vers 1700 à Nuremberg. Mozart fut l’un des premiers à lui écrire des chefs-d’œuvre.","win"],
+  basson:["Basson","Bois à anche double","Le grave des bois. Déplié, son tube mesurerait environ deux mètres et demi.","win"],
+  trompette:["Trompette","Cuivres","Le son naît de la vibration des lèvres dans l’embouchure. Les pistons, inventés au XIXe siècle, lui ont permis de jouer toutes les notes.","bra"],
+  cor:["Cor","Cuivres","Son tube enroulé mesure près de quatre mètres. Le corniste glisse sa main dans le pavillon pour ajuster le son.","bra"],
+  piano:["Piano","Clavier à cordes frappées","Inventé vers 1700 par Bartolomeo Cristofori. Son nom vient de « pianoforte » : il peut jouer doux et fort.","key"],
+  clavecin:["Clavecin","Clavier à cordes pincées","Ses cordes sont pincées par de petits becs, pas frappées par des marteaux : appuyer plus fort ne joue pas plus fort.","key"],
+  orgue:["Orgue","Clavier à vent","Le son vient de tuyaux alimentés par une soufflerie. Les grandes orgues en comptent plusieurs milliers.","key"],
+  celesta:["Célesta","Clavier à percussion","Des marteaux frappent des lames de métal. Il a été inventé à Paris en 1886 par Auguste Mustel.","key"],
+  voix:["Voix soliste","Voix","Soprano, mezzo, ténor, baryton ou basse : la tessiture d’un chanteur détermine les rôles qu’il peut tenir.","voc"],
+  choeur:["Chœur","Voix","Un chœur se répartit généralement en quatre pupitres : sopranos, altos, ténors et basses.","voc"],
+  orchestre:["Orchestre symphonique","Ensemble","Plusieurs dizaines de musiciens : cordes, bois, cuivres et percussions, réunis sous la direction d’un chef.","ens"],
+  cordes:["Orchestre à cordes","Ensemble","Violons, altos, violoncelles et contrebasses, sans vents ni percussions.","ens"],
+  quatuor:["Quatuor à cordes","Musique de chambre","Deux violons, un alto et un violoncelle : la formation reine de la musique de chambre depuis Haydn.","ens"],
+  trio:["Trio avec piano","Musique de chambre","Piano, violon et violoncelle réunis : une formation que Haydn, Beethoven et Schubert ont portée très haut.","ens"],
+  violonpiano:["Violon et piano","Musique de chambre","Dans une sonate pour violon et piano, les deux instruments dialoguent à égalité, sans soliste ni accompagnateur.","ens"],
+  pianoorch:["Piano et orchestre","Concerto","Dans un concerto, un soliste dialogue avec l’orchestre et s’y oppose parfois.","ens"],
+  violonorch:["Violon et orchestre","Concerto","Le concerto pour violon met en valeur la virtuosité du soliste, souvent dans une cadence jouée seul.","ens"],
+  celloorch:["Violoncelle et orchestre","Concerto","Le violoncelle doit percer à travers l’orchestre : les compositeurs allègent souvent l’accompagnement quand il joue.","ens"],
+  vents:["Ensemble à vents","Ensemble","Flûtes, hautbois, clarinettes, bassons et cors : on parlait d’Harmoniemusik dans la Vienne de Mozart.","ens"]
+};
+
+/* ============ CATALOGUE ============ */
+let COMPOSERS = {}, ALL = [], PB = {}, P = [], CAT_OK = false;
+const DAY = 864e5, EPOCH = Date.UTC(2026, 9, 23);   // défi n°1 = 23 octobre 2026
+const today = new Date();
+const todayKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+const todayFR = today.toLocaleDateString("fr-FR", { day: "numeric", month: "long" });
+const dayOf = s => { const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(s || ""); return m ? Math.round((Date.UTC(+m[1], +m[2] - 1, +m[3]) - EPOCH) / DAY) + 1 : 1; };
+const dayNo = Math.max(1, dayOf(todayKey));
+const avail = (p, d) => p.addedDay <= d && (p.retiredDay == null || p.retiredDay > d);
+async function loadCatalog() {
+  const r = await fetch("catalog.json", { cache: "no-cache" });
+  if (!r.ok) throw new Error("HTTP " + r.status);
+  const c = await r.json();
+  COMPOSERS = c.composers || {};
+  ALL = (c.pieces || []).filter(p => p && p.id && p.audio && p.t && COMPOSERS[p.c]).map(p => Object.assign({}, p, {
+    addedDay: dayOf(p.added), retiredDay: p.retired ? dayOf(p.retired) : null,
+    e: p.y ? eraOf(p.y) : COMPOSERS[p.c][4]
+  }));
+  PB = Object.fromEntries(ALL.map(p => [p.id, p]));
+  P = ALL.filter(p => avail(p, dayNo));
+  CAT_OK = P.length >= 5;
+}
+const yearTxt = p => p.y ? (p.approx ? `vers ${p.y}` : String(p.y)) : "date incertaine";
+
+/* ============ STATE / STORAGE ============ */
+const disco = new Set((store.get("dacapo-disco") || "").split(",").filter(Boolean));
+const saveDisco = () => store.set("dacapo-disco", [...disco].join(","));
+
+/* ============ AUDIO ============ */
+let actx = null, master = null, analyser = null, cur = null, playToken = 0;
+const raw = new Map(), decoded = new Map();
+function ctx() {
+  if (!actx) {
+    const AC = window.AudioContext || window.webkitAudioContext;
+    actx = new AC();
+    master = actx.createGain(); master.gain.value = .9;
+    analyser = actx.createAnalyser(); analyser.fftSize = 256; analyser.smoothingTimeConstant = .78;
+    master.connect(analyser); analyser.connect(actx.destination);
+  }
+  if (actx.state === "suspended") actx.resume();
+  return actx;
+}
+function fetchRaw(id) {
+  if (!raw.has(id)) {
+    const pr = fetch(PB[id].audio).then(r => { if (!r.ok) throw new Error("HTTP " + r.status); return r.arrayBuffer(); });
+    pr.catch(() => raw.delete(id));
+    raw.set(id, pr);
+  }
+  return raw.get(id);
+}
+async function getBuffer(id) {
+  if (decoded.has(id)) return decoded.get(id);
+  const ab = await fetchRaw(id);
+  const c = ctx();
+  let buf = await new Promise((res, rej) => c.decodeAudioData(ab.slice(0), res, rej));
+  if (!PB[id].loop) {   // real recordings: replay after a short breath instead of a seamless loop
+    const pad = Math.round(.9 * buf.sampleRate), out = c.createBuffer(buf.numberOfChannels, buf.length + pad, buf.sampleRate);
+    for (let ch = 0; ch < buf.numberOfChannels; ch++) out.copyToChannel(buf.getChannelData(ch), ch, 0);
+    buf = out;
+  }
+  decoded.set(id, buf);
+  return buf;
+}
+function stopAudio() {
+  playToken++;
+  if (cur && actx) { const { src, g } = cur; try { g.gain.setTargetAtTime(0, actx.currentTime, .04); src.stop(actx.currentTime + .25); } catch (e) {} }
+  cur = null; setPP(false);
+}
+async function playClip(id, onStart) {
+  stopAudio();
+  const tok = playToken;
+  setPP(true, true);
+  try {
+    const buf = await getBuffer(id);
+    if (tok !== playToken) return false;
+    const c = ctx();
+    const src = c.createBufferSource(); src.buffer = buf; src.loop = true;
+    src.loopStart = 0; src.loopEnd = PB[id].loop ? Math.min(buf.duration, PB[id].loop + .35) : buf.duration;
+    const g = c.createGain(); g.gain.value = 1; src.connect(g); g.connect(master); src.start();
+    cur = { src, g, id };
+    setPP(true);
+    if (onStart) onStart();
+    return true;
+  } catch (e) {
+    if (tok === playToken) { setPP(false); showErr("Impossible de charger cet extrait. Vérifiez votre connexion, puis touchez le bouton de lecture pour réessayer."); }
+    return false;
+  }
+}
+const ICON_PLAY = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4.5v15l13-7.5z"/></svg>';
+const ICON_STOP = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="5" width="4.2" height="14" rx="1"/><rect x="13.8" y="5" width="4.2" height="14" rx="1"/></svg>';
+const ICON_LOAD = '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>';
+function setPP(on, loading) {
+  const b = $("#pp"); if (!b) return;
+  b.innerHTML = loading ? ICON_LOAD : on ? ICON_STOP : ICON_PLAY;
+  b.setAttribute("aria-label", on ? "Arrêter l’écoute" : "Écouter l’extrait");
+  const m = $("#m-play"); if (m) m.textContent = on ? "■ Arrêter" : "▶ Écouter";
+}
+
+/* ============ VISUALIZER ============ */
+const viz = $("#viz"), vctx = viz.getContext("2d");
+const FG = getComputedStyle(document.documentElement).getPropertyValue("--fg").trim() || "#F2F4F7";
+let vizColor = "", freqData = null, rafOn = false;
+function sizeViz() { const r = viz.getBoundingClientRect(); const dpr = Math.min(2, window.devicePixelRatio || 1); viz.width = Math.max(1, r.width * dpr); viz.height = Math.max(1, r.height * dpr); }
+new ResizeObserver(sizeViz).observe(viz);
+function drawViz(t) {
+  const W = viz.width, H = viz.height; if (!W) return;
+  vctx.clearRect(0, 0, W, H);
+  const cx = W / 2, cy = H / 2, R = Math.min(W, H) / 2;
+  const n = 72, inner = R * .36, maxLen = R * .5;
+  if (analyser) { if (!freqData) freqData = new Uint8Array(analyser.frequencyBinCount); analyser.getByteFrequencyData(freqData); }
+  const col = vizColor || FG;
+  vctx.strokeStyle = "rgba(255,255,255,0.06)"; vctx.lineWidth = Math.max(1, R * .004);
+  for (let k = 0; k < 6; k++) { vctx.beginPath(); vctx.arc(cx, cy, inner + (R * .9 - inner) * k / 6 + R * .02, 0, Math.PI * 2); vctx.stroke(); }
+  vctx.strokeStyle = col; vctx.lineCap = "round"; vctx.lineWidth = Math.max(2, R * .022);
+  for (let i = 0; i < n; i++) {
+    const a = i / n * Math.PI * 2 - Math.PI / 2;
+    let v;
+    if (cur && freqData) { const idx = Math.floor(2 + (i < n / 2 ? i : n - i) / (n / 2) * (freqData.length * .62)); v = freqData[idx] / 255; }
+    else v = .05 + .04 * Math.sin(t / 700 + i * .5);
+    const len = R * .02 + v * maxLen;
+    vctx.globalAlpha = cur ? .35 + v * .65 : .35;
+    vctx.beginPath(); vctx.moveTo(cx + Math.cos(a) * inner, cy + Math.sin(a) * inner); vctx.lineTo(cx + Math.cos(a) * (inner + len), cy + Math.sin(a) * (inner + len)); vctx.stroke();
+  }
+  vctx.globalAlpha = 1;
+}
+function loop(t) { if (!rafOn) return; drawViz(t); tickTimer(); requestAnimationFrame(loop); }
+function startRaf() { if (!rafOn) { rafOn = true; requestAnimationFrame(loop); } }
+function stopRaf() { rafOn = false; }
+
+/* ============ HELPERS ============ */
+function rng(seed) { return () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+function shuffle(a, r = Math.random) { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(r() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+function hash(s) { let h = 2166136261; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; }
+const cname = id => COMPOSERS[id][0];
+const cshort = id => COMPOSERS[id][1];
+const cdates = id => `${COMPOSERS[id][2]}-${COMPOSERS[id][3]}`;
+const fmt = (n, d = 0) => n.toLocaleString("fr-FR", { minimumFractionDigits: d, maximumFractionDigits: d });
+const mmss = s => `${Math.floor(s / 60)} min ${String(Math.round(s % 60)).padStart(2, "0")}`;
+
+// Free play: pieces not yet in the player's discothèque come first, one piece per composer when possible.
+function pickRounds(n, filter, r) {
+  const pool = shuffle(P.filter(filter), r);
+  pool.sort((a, b) => disco.has(a.id) - disco.has(b.id));
+  const out = [], used = new Set();
+  for (const p of pool) { if (out.length >= n) break; if (!used.has(p.c)) { out.push(p); used.add(p.c); } }
+  for (const p of pool) { if (out.length >= n) break; if (!out.includes(p)) out.push(p); }
+  return shuffle(out, r);
+}
+// Daily challenge, identical for everyone: the pieces available each day are dealt in a shuffled
+// order, five a day with distinct composers; none comes back before the whole deck has been played,
+// and a piece waits at least 6 days before returning. Pieces added on a given day slip into the
+// next few weeks of the deck; retired pieces leave it. Past days never depend on later additions.
+function dailyRounds(n) {
+  let deck = [], cycle = 0, day = [];
+  const last = {};
+  for (let d = 1; d <= n; d++) {
+    const pool = ALL.filter(p => avail(p, d));
+    if (pool.length < 5) { day = pool.map(p => p.id); continue; }
+    const ok = new Set(pool.map(p => p.id));
+    deck = deck.filter(id => ok.has(id));
+    if (d > 1) for (const p of pool) if (p.addedDay === d && !deck.includes(p.id)) deck.splice(hash(p.id) % (Math.min(deck.length, 30) + 1), 0, p.id);
+    const refill = () => {
+      const left = new Set(deck);
+      const perm = shuffle(pool.map(p => p.id).sort(), rng(7919 * (cycle + 1) + 17)); cycle++;
+      deck = deck.concat(perm.filter(id => !left.has(id)), perm.filter(id => left.has(id)));
+    };
+    const gap = clamp(Math.floor(pool.length / 5) - 1, 1, 6);
+    day = [];
+    const okC = id => !day.some(x => x === id || PB[x].c === PB[id].c);
+    const okG = id => last[id] == null || d - last[id] >= gap;
+    let guard = 0;
+    while (day.length < 5 && guard++ < 50) {
+      if (deck.length < 10) refill();
+      let i = deck.findIndex(id => okC(id) && okG(id));
+      if (i < 0) { refill(); i = deck.findIndex(id => okC(id) && okG(id)); }
+      if (i < 0) i = deck.findIndex(id => !day.includes(id));
+      if (i < 0) break;
+      const id = deck.splice(i, 1)[0]; day.push(id); last[id] = d;
+    }
+  }
+  return day.map(id => PB[id]);
+}
+function composerOptions(p, r) {
+  const era = COMPOSERS[p.c][4];
+  const all = Object.keys(COMPOSERS).filter(k => k !== p.c);
+  const opts = [];
+  if (p.c === "petzold") opts.push("bach");
+  const same = shuffle(all.filter(k => COMPOSERS[k][4] === era && !opts.includes(k)), r);
+  const other = shuffle(all.filter(k => COMPOSERS[k][4] !== era && !opts.includes(k)), r);
+  while (opts.length < 2 && same.length) opts.push(same.shift());
+  if (other.length) opts.push(other.shift());
+  while (opts.length < 3 && (same.length || other.length)) opts.push(same.shift() || other.shift());
+  return shuffle([p.c, ...opts.slice(0, 3)], r);
+}
+function titleOptions(p, r) {
+  const others = shuffle(ALL.filter(x => x.id !== p.id && x.t !== p.t), r);
+  const picks = [], seen = new Set([p.t]);
+  const sameComp = others.filter(x => x.c === p.c);
+  if (sameComp.length && r() < .6) { picks.push(sameComp[0]); seen.add(sameComp[0].t); }
+  for (const x of others) { if (picks.length >= 3) break; if (!seen.has(x.t)) { picks.push(x); seen.add(x.t); } }
+  return shuffle([p, ...picks], r).map(x => x.id);
+}
+function instOptions(p, r) {
+  const fam = INST[p.form][3];
+  const keys = Object.keys(INST).filter(k => k !== p.form);
+  const same = shuffle(keys.filter(k => INST[k][3] === fam), r);
+  const other = shuffle(keys.filter(k => INST[k][3] !== fam), r);
+  const opts = [...same.slice(0, 2)];
+  while (opts.length < 3) opts.push(other.shift());
+  return shuffle([p.form, ...opts], r);
+}
+function showErr(msg) { const q = $("#q"); if (!q) return; let e = $(".err", q); if (!e) { e = document.createElement("p"); e.className = "err"; q.appendChild(e); } e.textContent = fr(msg); }
+
+/* ============ GAME ============ */
+const MODES = {
+  blind: { name: "Blind test", n: 8, filter: p => true },
+  daily: { name: "Défi du jour", n: 5, filter: p => true },
+  year:  { name: "L’année", n: 5, filter: p => !!p.y },
+  inst:  { name: "L’instrument", n: 6, filter: p => !!(p.form && INST[p.form]) }
+};
+const LIMIT = 20;
+const G = { mode: null, rounds: [], i: 0, score: 0, res: [], phase: "idle", r: Math.random, t0: 0, answers: {}, newly: 0 };
+const playEl = $("#play"), homeEl = $("#home"), qEl = $("#q");
+
+function setFlood(e) { document.body.classList.remove("flooded", "e-B", "e-C", "e-R", "e-M"); if (e) document.body.classList.add("flooded", "e-" + e); vizColor = e ? "#ffffff" : ""; }
+function header() {
+  $("#p-mode").textContent = fr(G.mode === "daily" ? `Défi n°${dayNo}` : MODES[G.mode].name);
+  $("#p-round").textContent = `${Math.min(G.i + 1, G.rounds.length)}/${G.rounds.length}`;
+  $("#p-score").textContent = G.mode === "year" ? fmt(G.score, 2) : fmt(G.score);
+}
+function startGame(mode) {
+  if (!CAT_OK) return;
+  ctx();
+  G.mode = mode; G.i = 0; G.score = 0; G.res = []; G.newly = 0;
+  G.r = rng(mode === "daily" ? 1000003 * dayNo : Math.floor(Math.random() * 1e9));
+  G.rounds = mode === "daily" ? dailyRounds(dayNo) : pickRounds(MODES[mode].n, MODES[mode].filter, G.r);
+  if (!G.rounds.length) return;
+  G.rounds.forEach(p => fetchRaw(p.id).catch(() => {}));
+  homeEl.hidden = true; playEl.hidden = false; window.scrollTo(0, 0);
+  startRaf();
+  round();
+}
+function quitGame() {
+  stopAudio(); stopRaf(); clearTimer(); setFlood(null);
+  G.phase = "idle"; playEl.hidden = true; homeEl.hidden = false; renderHome();
+}
+function unlock(p) { if (!disco.has(p.id)) { disco.add(p.id); G.newly++; saveDisco(); } }
+
+/* --- speed-bonus ring (blind test). It never ends the round. --- */
+let timerOn = false;
+function clearTimer() { timerOn = false; const ring = $("#ring"); ring.style.strokeDashoffset = 0; ring.classList.remove("low"); }
+function tickTimer() {
+  if (!timerOn) return;
+  const chosen = G.answers.c != null;
+  const el = Math.max(0, ((chosen ? G.answers.cT : performance.now()) - G.t0) / 1000), left = Math.max(0, LIMIT - el);
+  const ring = $("#ring");
+  ring.style.strokeDashoffset = (100 * (1 - left / LIMIT)).toFixed(2);
+  ring.classList.toggle("low", !chosen && left > 0 && left < 5);
+  const cap = chosen ? (left > 0 ? `Compositeur choisi en ${Math.max(1, Math.round(el))} s` : "Compositeur choisi")
+    : left > 0 ? `Bonus de vitesse : ${Math.ceil(left)} s` : "Bonus écoulé · prenez votre temps";
+  const capEl = $("#deck-cap"), txt = fr(cap);
+  if (capEl.textContent !== txt) capEl.textContent = txt;
+}
+
+function round() {
+  setFlood(null); clearTimer(); header();
+  const p = G.rounds[G.i];
+  G.phase = "q"; G.answers = {}; G.t0 = 0;
+  const next = G.rounds[G.i + 1]; if (next) fetchRaw(next.id).catch(() => {});
+  if (G.mode === "blind" || G.mode === "daily") roundBlind(p);
+  else if (G.mode === "year") roundYear(p);
+  else roundInst(p);
+}
+const choiceBtn = (key, val, label, sub, k) => `<button class="choice" type="button" data-g="${key}" data-v="${esc(val)}"><span class="n">${k ? `<span class="kbd">${k}</span>` : ""}${esc(label)}</span>${sub ? `<span class="d">${esc(sub)}</span>` : ""}</button>`;
+
+/* blind */
+function roundBlind(p) {
+  const co = composerOptions(p, G.r), to = titleOptions(p, G.r);
+  qEl.innerHTML = fr(`<p class="q-h">Qui a composé cet extrait ?</p>
+    <div><p class="q-sub"><span>Compositeur</span><span>50 pts + bonus de vitesse</span></p><div class="choices">${co.map((c, i) => choiceBtn("c", c, cname(c), cdates(c), i + 1)).join("")}</div></div>
+    <div><p class="q-sub"><span>Et le titre ?</span><span>+ 50 pts</span></p><div class="choices">${to.map(id => choiceBtn("t", id, PB[id].t, "")).join("")}</div></div>
+    <div class="q-foot"><button class="btn" type="button" id="val">Passer cet extrait</button><p class="hint" id="val-hint">La réponse s’affiche dès que vous avez choisi les deux.</p></div>`);
+  $$(".choice", qEl).forEach(b => b.addEventListener("click", () => pick(b.dataset.g, b.dataset.v)));
+  $("#val").addEventListener("click", blindReveal);
+  $("#deck-cap").textContent = "Chargement…";
+  playClip(p.id, startTimerIfNeeded);
+}
+function startTimerIfNeeded() {
+  if ((G.mode === "blind" || G.mode === "daily") && G.phase === "q" && !G.t0) { G.t0 = performance.now(); timerOn = true; }
+  else if (G.mode === "year" || G.mode === "inst") $("#deck-cap").textContent = "écoute en boucle";
+}
+function pick(g, v) {
+  if (G.phase !== "q") return;
+  if (G.mode === "inst") {
+    if (G.answers.i != null) return;
+    G.answers.i = v;
+    $$(".choice", qEl).forEach(b => { b.disabled = true; b.classList.toggle("picked", b.dataset.v === v); });
+    return instReveal();
+  }
+  if (G.answers[g] === v) return;
+  G.answers[g] = v; G.answers[g + "T"] = performance.now();   // a choice can be changed until the answer is revealed
+  $$(`.choice[data-g="${g}"]`, qEl).forEach(b => { const on = b.dataset.v === v; b.classList.toggle("picked", on); b.setAttribute("aria-pressed", on); });
+  if (G.answers.c != null && G.answers.t != null) blindReveal();
+  else updateValidate();
+}
+function updateValidate() {
+  const b = $("#val"), h = $("#val-hint"); if (!b) return;
+  const c = G.answers.c != null, t = G.answers.t != null;
+  b.textContent = fr(c ? "Valider sans le titre" : t ? "Valider sans le compositeur" : "Passer cet extrait");
+  b.classList.toggle("solid", c || t);
+  h.textContent = fr(c ? "Choisissez aussi le titre, ou validez tel quel." : t ? "Choisissez aussi le compositeur, ou validez tel quel." : "La réponse s’affiche dès que vous avez choisi les deux.");
+}
+function blindReveal() {
+  if (G.phase !== "q") return;
+  G.phase = "r"; timerOn = false;
+  const p = G.rounds[G.i];
+  const okC = G.answers.c === p.c, okT = G.answers.t === p.id;
+  let pts = 0;
+  if (okC) { const el = G.t0 ? Math.max(0, (G.answers.cT - G.t0) / 1000) : LIMIT; pts += 50 + Math.round(50 * clamp(1 - el / LIMIT, 0, 1)); }
+  if (okT) pts += 50;
+  G.score += pts; G.res.push({ p, pts, okC, okT, sq: okC && okT ? 1 : okC || okT ? 2 : 3 });
+  unlock(p); header();
+  const mkC = G.answers.c == null ? `<span class="mk no">Compositeur passé</span>`
+    : okC ? `<span class="mk ok">✓ Compositeur</span>` : `<span class="mk no">✗ Compositeur (vous : ${esc(cshort(G.answers.c))})</span>`;
+  const mkT = G.answers.t == null ? `<span class="mk no">Titre passé</span>`
+    : `<span class="mk ${okT ? "ok" : "no"}">${okT ? "✓" : "✗"} Titre</span>`;
+  revealView(p, `<p class="pts">+${pts}<small> pts</small></p><div class="marks">${mkC}${mkT}</div>`);
+}
+
+/* year */
+const Y0 = 1600, Y1 = 1950, A0 = -150, A1 = 150, CX = 170, CY = 170;
+let dialYear = 1775, dialLocked = false, dialEl = null, needleG = null, revealG = null;
+const pol = (r, deg) => { const a = deg * Math.PI / 180; return [CX + r * Math.sin(a), CY - r * Math.cos(a)]; };
+const y2a = yv => A0 + (clamp(yv, Y0, Y1) - Y0) / (Y1 - Y0) * (A1 - A0);
+const arcD = (r, d0, d1) => { const [x0, y0] = pol(r, d0), [x1, y1] = pol(r, d1); return `M${x0.toFixed(2)} ${y0.toFixed(2)} A${r} ${r} 0 ${d1 - d0 > 180 ? 1 : 0} 1 ${x1.toFixed(2)} ${y1.toFixed(2)}`; };
+const svgNS = "http://www.w3.org/2000/svg";
+const sv = (tag, a, parent) => { const el = document.createElementNS(svgNS, tag); for (const k in a) el.setAttribute(k, a[k]); if (parent) parent.appendChild(el); return el; };
+function buildDial(svg) {
+  svg.innerHTML = "";
+  sv("path", { d: arcD(150, A0, A1), class: "d-ring" }, svg);
+  [["B",1600,1750],["C",1750,1820],["R",1820,1900],["M",1900,1950]].forEach(([e, a, b]) => sv("path", { d: arcD(132, y2a(a) + .6, y2a(b) - .6), class: `d-era de-${e}` }, svg));
+  for (let yv = Y0; yv <= Y1; yv += 10) {
+    const maj = yv % 50 === 0; const [x0, y0] = pol(maj ? 140 : 144, y2a(yv)), [x1, y1] = pol(150, y2a(yv));
+    sv("line", { x1: x0, y1: y0, x2: x1, y2: y1, class: "d-tick" + (maj ? " maj" : "") }, svg);
+    if (maj) { const [lx, ly] = pol(114, y2a(yv)); sv("text", { x: lx, y: ly, class: "d-lab" }, svg).textContent = yv; }
+  }
+  revealG = sv("g", {}, svg); needleG = sv("g", {}, svg);
+}
+function drawNeedle() {
+  needleG.innerHTML = "";
+  const a = y2a(dialYear), cls = G.phase === "r" ? " ghost" : "";
+  const [x0, y0] = pol(92, a), [x1, y1] = pol(148, a);
+  sv("line", { x1: x0, y1: y0, x2: x1, y2: y1, class: "needle" + cls }, needleG);
+  const [kx, ky] = pol(150, a); sv("circle", { cx: kx, cy: ky, r: 9, class: "knob" + cls }, needleG);
+}
+function setDial(v) { dialYear = clamp(Math.round(v), Y0, Y1); $("#dial-year").textContent = dialYear; dialEl.setAttribute("aria-valuenow", dialYear); drawNeedle(); }
+function roundYear(p) {
+  qEl.innerHTML = fr(`<p class="q-h">En quelle année cette œuvre a-t-elle été composée ?</p>
+    <div class="deck" style="gap:.6rem">
+      <div class="dial-box"><svg id="dial" viewBox="0 0 340 340" role="slider" tabindex="0" aria-label="Année de composition" aria-valuemin="1600" aria-valuemax="1950"></svg>
+      <div class="dial-center"><output id="dial-year">1775</output><span id="dial-sub">tournez le cadran</span></div></div>
+      <div class="legend"><span><i class="dot e-B"></i>Baroque</span><span><i class="dot e-C"></i>Classique</span><span><i class="dot e-R"></i>Romantique</span><span><i class="dot e-M"></i>XXe</span></div>
+      <div class="fine" id="fine"><button type="button" data-d="-10">−10</button><button type="button" data-d="-1">−1</button><button type="button" data-d="1">+1</button><button type="button" data-d="10">+10</button></div>
+    </div>
+    <div class="actions"><button class="btn solid" type="button" id="y-ok">Valider l’année</button></div>`);
+  dialEl = $("#dial"); buildDial(dialEl); dialLocked = false; setDial(1775);
+  const evt = e => { const r = dialEl.getBoundingClientRect(); const x = (e.clientX - r.left) / r.width * 340 - CX, y = (e.clientY - r.top) / r.height * 340 - CY; const deg = clamp(Math.atan2(x, -y) * 180 / Math.PI, A0, A1); setDial(Y0 + (deg - A0) / (A1 - A0) * (Y1 - Y0)); };
+  dialEl.addEventListener("pointerdown", e => { if (dialLocked) return; dialEl.setPointerCapture(e.pointerId); evt(e); });
+  dialEl.addEventListener("pointermove", e => { if (!dialLocked && dialEl.hasPointerCapture(e.pointerId)) evt(e); });
+  dialEl.addEventListener("keydown", e => { const d = { ArrowRight: 1, ArrowUp: 1, ArrowLeft: -1, ArrowDown: -1, PageUp: 10, PageDown: -10 }[e.key]; if (d && !dialLocked) { e.preventDefault(); setDial(dialYear + d); } if (e.key === "Enter") { e.preventDefault(); yearReveal(); } });
+  $("#fine").addEventListener("click", e => { const b = e.target.closest("button"); if (b && !dialLocked) setDial(dialYear + +b.dataset.d); });
+  $("#y-ok").addEventListener("click", yearReveal);
+  $("#deck-cap").textContent = "Chargement…";
+  playClip(p.id, startTimerIfNeeded);
+}
+function yearReveal() {
+  if (G.phase !== "q") return;
+  G.phase = "r"; dialLocked = true; dialEl.classList.add("locked"); $$("#fine button").forEach(b => b.disabled = true);
+  const p = G.rounds[G.i];
+  const d = Math.abs(dialYear - p.y), s = Math.round(1000 * Math.exp(-.5 * Math.pow(d / 35, 2))) / 100;
+  G.score = Math.round((G.score + s) * 100) / 100; G.res.push({ p, pts: s, guess: dialYear, sq: s >= 8 ? 1 : s >= 4 ? 2 : 3 });
+  unlock(p); header(); drawNeedle();
+  revealG.innerHTML = "";
+  const ag = y2a(dialYear), at = y2a(p.y);
+  if (d > 0) sv("path", { d: arcD(150, Math.min(ag, at), Math.max(ag, at)), class: "gap-arc" }, revealG);
+  const [x0, y0] = pol(92, at), [x1, y1] = pol(148, at); sv("line", { x1: x0, y1: y0, x2: x1, y2: y1, class: "truth-n" }, revealG);
+  const [kx, ky] = pol(150, at); sv("circle", { cx: kx, cy: ky, r: 10, class: "truth-k" }, revealG);
+  const dialHTML = $(".dial-box", qEl).outerHTML;
+  revealView(p, `<p class="pts">${fmt(s, 2)}<small> / 10</small></p><div class="marks"><span class="mk">Vous : ${dialYear}</span><span class="mk">Réel : ${yearTxt(p)}</span><span class="mk ${d <= 10 ? "ok" : "no"}">Écart : ${d === 0 ? "aucun !" : d + " an" + (d > 1 ? "s" : "")}</span></div>`);
+  const box = document.createElement("div"); box.className = "deck"; box.innerHTML = dialHTML; qEl.insertBefore(box, qEl.firstChild);
+  $("#dial-year", box).textContent = p.y; $("#dial-sub", box).textContent = "année réelle";
+}
+
+/* instrument */
+function roundInst(p) {
+  const opts = instOptions(p, G.r);
+  qEl.innerHTML = fr(`<p class="q-h">Qui joue dans cet extrait ?</p>
+    <div><p class="q-sub"><span>Instrument ou ensemble</span><span>100 pts</span></p><div class="choices">${opts.map((k, i) => choiceBtn("i", k, INST[k][0], INST[k][1], i + 1)).join("")}</div></div>`);
+  $$(".choice", qEl).forEach(b => b.addEventListener("click", () => pick("i", b.dataset.v)));
+  $("#deck-cap").textContent = "Chargement…";
+  playClip(p.id, startTimerIfNeeded);
+}
+function instReveal() {
+  if (G.phase !== "q") return;
+  G.phase = "r";
+  const p = G.rounds[G.i], ok = G.answers.i === p.form, pts = ok ? 100 : 0;
+  G.score += pts; G.res.push({ p, pts, ok, sq: ok ? 1 : 3 });
+  unlock(p); header();
+  const I = INST[p.form], mine = INST[G.answers.i] ? INST[G.answers.i][0] : "";
+  revealView(p, `<p class="pts">+${pts}<small> pts</small></p><div class="marks">${ok ? `<span class="mk ok">✓ ${I[0]}</span>` : `<span class="mk no">✗ Vous : ${esc(mine)}</span><span class="mk ok">Réponse : ${I[0]}</span>`}<span class="mk">${I[1]}</span></div><p class="fact">${I[2]}</p>`);
+}
+
+function creditHTML(p) {
+  if (!p.src) return `<p class="credit">Version synthétisée : arrangement simplifié du thème, en attendant un enregistrement libre de droits.</p>`;
+  const s = p.src, parts = [];
+  if (s.artist) parts.push(`Interprétation : ${esc(s.artist)}`);
+  const host = /archive\.org/.test(s.page || s.file || "") ? "Internet Archive" : "Wikimedia Commons";
+  parts.push(s.page ? `<a href="${esc(s.page)}" target="_blank" rel="noopener">${host}</a>` : host);
+  if (s.licence) parts.push(esc(s.licence));
+  if (s.start != null && s.start > 5) parts.push(`extrait à ${mmss(s.start)}`);
+  return `<p class="credit">${parts.join(" · ")}</p>`;
+}
+function cardHTML(p) {
+  const c = COMPOSERS[p.c];
+  const age = p.y ? ` · ${esc(c[1])} avait environ ${p.y - c[2]} ans` : "";
+  return `<div class="card"><p class="t">${esc(p.t)}</p><p class="meta"><span>${esc(c[0])} (${c[2]}-${c[3]})</span><span>${yearTxt(p)}${age}</span>${p.cat ? `<span>${esc(p.cat)}</span>` : ""}</p>${p.fact ? `<p class="fact">${esc(p.fact)}</p>` : ""}${p.stat ? `<p class="stat-l"><b>En concert</b>${esc(p.stat)}</p>` : ""}${creditHTML(p)}</div>`;
+}
+function revealView(p, top) {
+  setFlood(p.e);
+  $("#deck-cap").textContent = fr(`${ERA[p.e]} · l’extrait continue`);
+  const last = G.i === G.rounds.length - 1;
+  qEl.innerHTML = fr(`<div class="reveal">${top}${cardHTML(p)}<div class="actions"><button class="btn solid" type="button" id="next">${last ? "Voir mon résultat" : "Extrait suivant →"}</button></div></div>`);
+  $("#next").addEventListener("click", () => { if (last) endGame(); else { G.i++; round(); } });
+  $("#next").focus({ preventScroll: true });
+  if (innerWidth < 860) $("#q").scrollIntoView({ behavior: RM ? "auto" : "smooth", block: "start" });
+}
+const MAX = { blind: 150, daily: 150, year: 10, inst: 100 };
+function verdict() {
+  const ratio = G.score / (MAX[G.mode] * G.rounds.length);
+  return ratio >= .85 ? "Oreille absolue." : ratio >= .65 ? "Mélomane averti." : ratio >= .45 ? "Bonne oreille." : ratio >= .25 ? "Auditeur curieux." : "Da capo : on reprend depuis le début ?";
+}
+function endGame() {
+  G.phase = "end"; stopAudio(); setFlood(null); clearTimer();
+  const max = MAX[G.mode] * G.rounds.length;
+  const total = G.mode === "year" ? fmt(G.score, 2) : fmt(G.score);
+  const key = "dacapo-best-" + (G.mode === "daily" ? "blind5" : G.mode);
+  const prev = parseFloat(store.get(key)); if (isNaN(prev) || G.score > prev) store.set(key, G.score);
+  if (G.mode === "daily") store.set("dacapo-daily-" + todayKey, JSON.stringify({ s: G.score, q: G.res.map(r => r.sq), max }));
+  const emo = ["", "🟩", "🟨", "🟥"];
+  const share = `Da capo · ${G.mode === "daily" ? `Défi n°${dayNo} (${todayFR})` : MODES[G.mode].name}\n${total} / ${fmt(max)} ${G.res.map(r => emo[r.sq]).join("")}`;
+  $("#p-round").textContent = "fin"; $("#deck-cap").textContent = "";
+  qEl.innerHTML = fr(`<div class="reveal">
+    <p class="eyebrow">Résultat</p>
+    <p class="pts">${total}<small> / ${fmt(max)}</small></p>
+    <p class="q-h" style="font-style:italic">${verdict()}</p>
+    <ul class="sum">${G.res.map(r => `<li><i class="sq sq${r.sq}"></i><span>${esc(r.p.t)} <small>· ${esc(cshort(r.p.c))}${G.mode === "year" ? ` · ${r.p.y}, vous : ${r.guess}` : ""}</small></span><span class="p">${G.mode === "year" ? fmt(r.pts, 2) : r.pts}</span></li>`).join("")}</ul>
+    ${G.newly ? `<p class="note">${G.newly} nouvelle${G.newly > 1 ? "s" : ""} œuvre${G.newly > 1 ? "s" : ""} dans votre discothèque.</p>` : ""}
+    <div class="actions"><button class="btn solid" type="button" id="copy">Copier mon résultat</button>${G.mode !== "daily" ? `<button class="btn" type="button" id="again">Rejouer</button>` : ""}<button class="btn" type="button" id="back">Accueil</button></div>
+    <p class="note" id="copied" hidden></p></div>`);
+  $("#back").addEventListener("click", quitGame);
+  const again = $("#again"); if (again) again.addEventListener("click", () => startGame(G.mode));
+  $("#copy").addEventListener("click", () => copyText(share));
+}
+function copyText(text) {
+  const done = m => { const el = $("#copied"); el.hidden = false; el.textContent = fr(m); };
+  const fallback = () => { done("Copie automatique indisponible : sélectionnez le texte ci-dessous."); if ($(".share", qEl)) return; const ta = document.createElement("textarea"); ta.className = "share"; ta.readOnly = true; ta.value = text; $("#copied").after(ta); ta.focus(); ta.select(); };
+  try { navigator.clipboard.writeText(text).then(() => done("Résultat copié : collez-le où vous voulez."), fallback); } catch (e) { fallback(); }
+}
+
+/* deck button & keyboard */
+$("#pp").addEventListener("click", () => {
+  const p = G.rounds[G.i]; if (!p || G.phase === "end") return;
+  if (cur) stopAudio(); else playClip(p.id, startTimerIfNeeded);
+});
+document.addEventListener("keydown", e => {
+  if (playEl.hidden || e.target.closest("input,textarea") || e.metaKey || e.ctrlKey || e.altKey) return;
+  if (e.key === " " && e.target === document.body) { e.preventDefault(); $("#pp").click(); }
+  if (e.key === "Enter" && G.phase === "q" && (G.mode === "blind" || G.mode === "daily") && !e.target.closest("button")) { e.preventDefault(); blindReveal(); }
+  if (G.phase === "q" && /^[1-4]$/.test(e.key) && G.mode !== "year") {
+    const g = G.mode === "inst" ? "i" : "c";
+    const b = $$(`.choice[data-g="${g}"]`, qEl)[+e.key - 1]; if (b && !b.disabled) b.click();
+  }
+});
+$("#quit").addEventListener("click", quitGame);
+$("#home-btn").addEventListener("click", () => { if (!playEl.hidden) quitGame(); window.scrollTo(0, 0); });
+
+/* ============ HOME ============ */
+function renderHome() {
+  const emo = ["", "🟩", "🟨", "🟥"];
+  const known = [...disco].filter(id => PB[id]);
+  $("#disco-count").textContent = String(known.length);
+  if (!CAT_OK) return;
+  const real = P.filter(p => p.src).length, fresh = P.filter(p => p.addedDay > dayNo - 7 && p.addedDay > 1).length;
+  const pl = (n, one, many) => `<b>${n}</b> ${n > 1 ? many : one}`;
+  $("#fresh").innerHTML = fr(`<span>${pl(P.length, "extrait en jeu", "extraits en jeu")}</span>${real ? `<span>${pl(real, "enregistrement réel", "enregistrements réels")}</span>` : ""}${fresh ? `<span>${pl(fresh, "nouveau cette semaine", "nouveaux cette semaine")}</span>` : ""}`);
+  const daily = store.get("dacapo-daily-" + todayKey);
+  let d = null; try { d = daily ? JSON.parse(daily) : null; } catch (e) {}
+  const dmax = d && d.max ? d.max : 750;
+  $("#daily").innerHTML = fr(d
+    ? `<p class="k">Défi n°${dayNo} · ${todayFR}</p><h2>${fmt(d.s)} / ${fmt(dmax)}</h2><p>${(d.q || []).map(x => emo[x]).join(" ")} · prochain défi demain à minuit.</p><button class="btn dark" type="button" id="daily-share">Copier</button>`
+    : `<p class="k">Défi n°${dayNo} · ${todayFR}</p><h2>Cinq extraits, les mêmes pour tous</h2><p>Un nouveau défi chaque jour à minuit.</p><button class="btn dark" type="button" id="daily-go">Jouer le défi</button>`);
+  const dg = $("#daily-go"); if (dg) dg.addEventListener("click", () => startGame("daily"));
+  const ds = $("#daily-share"); if (ds) ds.addEventListener("click", () => {
+    const t = `Da capo · Défi n°${dayNo} (${todayFR})\n${fmt(d.s)} / ${fmt(dmax)} ${(d.q || []).map(x => emo[x]).join("")}`;
+    try { navigator.clipboard.writeText(t).then(() => { ds.textContent = "Copié !"; }, () => { ds.textContent = "Copie impossible"; }); } catch (e) { ds.textContent = "Copie impossible"; }
+  });
+  $$(".mode").forEach(b => { b.disabled = P.filter(MODES[b.dataset.mode].filter).length < MODES[b.dataset.mode].n; });
+  $$(".mode [data-best]").forEach(el => {
+    const v = parseFloat(store.get("dacapo-best-" + el.dataset.best));
+    const max = { blind: 1200, year: 50, inst: 600 }[el.dataset.best];
+    el.textContent = isNaN(v) ? "" : fr(`record : ${el.dataset.best === "year" ? fmt(v, 2) : fmt(v)} / ${fmt(max)}`);
+  });
+  const inPlay = known.filter(id => avail(PB[id], dayNo)).length;
+  $("#disco-bar").style.width = (P.length ? inPlay / P.length * 100 : 0) + "%";
+  $("#disco-txt").textContent = fr(known.length
+    ? `${known.length} œuvre${known.length > 1 ? "s" : ""} découverte${known.length > 1 ? "s" : ""}, ${P.length - inPlay} encore à découvrir parmi les ${P.length} en jeu. Touchez une œuvre pour la réécouter.`
+    : `Chaque œuvre entendue en jeu rejoint votre discothèque, avec son histoire. ${P.length} œuvres à découvrir.`);
+  const list = known.slice().reverse().map(id => PB[id]);
+  $("#disco").innerHTML = list.length
+    ? list.map(p => fr(`<button class="tile e-${p.e}" type="button" data-id="${esc(p.id)}"><span class="y">${yearTxt(p)}</span><span class="t">${esc(p.t)}</span><span class="c">${esc(cshort(p.c))}${avail(p, dayNo) ? "" : " · retiré du jeu"}</span></button>`)).join("")
+    : `<p class="empty">${fr("Votre discothèque est vide : jouez une partie pour la remplir.")}</p>`;
+}
+$("#disco").addEventListener("click", e => { const t = e.target.closest(".tile[data-id]"); if (t && PB[t.dataset.id]) openModal(PB[t.dataset.id]); });
+$("#disco-pill").addEventListener("click", () => { if (!playEl.hidden) quitGame(); $("#disco-sec").scrollIntoView({ behavior: RM ? "auto" : "smooth" }); });
+$$(".mode").forEach(b => b.addEventListener("click", () => startGame(b.dataset.mode)));
+
+/* modal */
+const modal = $("#modal");
+let modalReturn = null;
+function openModal(p) {
+  modalReturn = document.activeElement;
+  modal.className = `modal e-${p.e}`; modal.hidden = false;
+  const I = p.form && INST[p.form] ? INST[p.form] : null;
+  const playable = avail(p, dayNo);
+  modal.innerHTML = fr(`<div class="sheet"><div class="sheet-top"><p class="eyebrow" style="color:inherit;opacity:.85">${ERA[p.e]}</p><button class="x" type="button" id="m-close" aria-label="Fermer">×</button></div>
+    <h2 class="q-h" id="m-title">${esc(p.t)}</h2>
+    <p style="font:13.5px var(--f-mono);opacity:.9">${esc(cname(p.c))} (${cdates(p.c)}) · ${yearTxt(p)}${p.cat ? " · " + esc(p.cat) : ""}</p>
+    ${playable ? `<div class="actions"><button class="btn solid" type="button" id="m-play">▶ Écouter</button></div>` : `<p class="note" style="color:inherit">Cet extrait a quitté le jeu : il n’est plus disponible à l’écoute.</p>`}
+    ${p.fact ? `<p>${esc(p.fact)}</p>` : ""}${I ? `<p class="note" style="color:inherit;opacity:.92"><b>${I[0]}</b> · ${I[2]}</p>` : ""}${p.stat ? `<p class="note" style="color:inherit;opacity:.92">${esc(p.stat)}</p>` : ""}${creditHTML(p)}</div>`);
+  $("#m-close").addEventListener("click", closeModal);
+  const mp = $("#m-play"); if (mp) { mp.addEventListener("click", () => { if (cur) stopAudio(); else playClip(p.id); }); mp.focus(); } else $("#m-close").focus();
+}
+function closeModal() { stopAudio(); modal.hidden = true; modal.innerHTML = ""; if (modalReturn) modalReturn.focus(); }
+modal.addEventListener("click", e => { if (e.target === modal) closeModal(); });
+document.addEventListener("keydown", e => { if (e.key === "Escape" && !modal.hidden) closeModal(); });
+document.addEventListener("visibilitychange", () => { if (document.hidden) stopAudio(); });
+
+/* french spacing on static text */
+const tw = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, { acceptNode: n => n.parentElement && n.parentElement.closest("script,style") ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT });
+const texts = []; while (tw.nextNode()) texts.push(tw.currentNode);
+texts.forEach(n => { const v = fr(n.nodeValue); if (v !== n.nodeValue) n.nodeValue = v; });
+
+setPP(false);
+async function boot() {
+  try {
+    await loadCatalog();
+    if (!CAT_OK) throw new Error("catalogue vide");
+    renderHome();
+  } catch (e) {
+    $("#daily").innerHTML = fr(`<p class="k">Défi du jour</p><h2>Catalogue indisponible</h2><p>Le catalogue d’extraits n’a pas pu être chargé. Vérifiez votre connexion, puis réessayez.</p><button class="btn dark" type="button" id="retry">Réessayer</button>`);
+    $("#retry").addEventListener("click", boot);
+  }
+}
+boot();
+window.__dacapo = { G, get P() { return P; }, get ALL() { return ALL; }, startGame, blindReveal, dailyRounds, dayNo };
+})();
+</script>
+
+</body>
+</html>

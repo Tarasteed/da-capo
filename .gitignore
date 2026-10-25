@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+work/
+excerpts/
+# les extraits vivent sur la branche « audio » (voir README)
+audio/
+_site/
