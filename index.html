@@ -119,6 +119,10 @@ body.flooded .quit,body.flooded .pill{border-color:rgb(255 255 255 / .35);backgr
 .ring .fgc.low{stroke:var(--bad)}
 .pp{position:absolute;left:50%;top:50%;width:30%;aspect-ratio:1;transform:translate(-50%,-50%);border-radius:50%;border:0;background:var(--fg);color:var(--bg);cursor:pointer;display:grid;place-items:center;box-shadow:0 10px 30px rgb(0 0 0 / .4)}
 .pp svg{width:38%;height:38%;fill:currentColor}
+.vol{display:flex;align-items:center;gap:.7rem;width:min(100%,20rem);margin:1rem auto 0;font:500 13px var(--f-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--fg-2)}
+.vol input{flex:1;min-width:0;height:28px;margin:0;accent-color:var(--fg);cursor:pointer}
+.vol output{min-width:2.2em;text-align:right;color:var(--fg)}
+body.flooded .vol{color:rgb(255 255 255 / .85)}
 .deck-cap{font:500 15px var(--f-body);color:var(--fg-2);text-align:center;min-height:1.3em}
 body.flooded .deck-cap,body.flooded .play-bar .stat{color:rgb(255 255 255 / .85)}
 .q{display:grid;gap:1.4rem;min-width:0}
@@ -301,6 +305,7 @@ body.flooded .deck-cap,body.flooded .play-bar .stat{color:rgb(255 255 255 / .85)
           <svg class="ring" viewBox="0 0 100 100" aria-hidden="true"><circle class="bgc" cx="50" cy="50" r="48.5"></circle><circle class="fgc" id="ring" cx="50" cy="50" r="48.5" pathLength="100" stroke-dasharray="100" stroke-dashoffset="0"></circle></svg>
           <button class="pp" id="pp" type="button" aria-label="Écouter"></button>
         </div>
+        <label class="vol" for="vol"><span>Volume</span><input type="range" id="vol" min="0" max="100" step="1" value="50" aria-label="Volume"><output id="vol-v" for="vol">50</output></label>
         <p class="deck-cap" id="deck-cap"></p>
       </div>
       <div class="q" id="q"></div>
@@ -390,13 +395,17 @@ const disco = new Set((store.get("dacapo-disco") || "").split(",").filter(Boolea
 const saveDisco = () => store.set("dacapo-disco", [...disco].join(","));
 
 /* ============ AUDIO ============ */
+/* Volume: 100 = the original level (gain .9); the slider starts at 50, half of it. Remembered per browser. */
+const MAX_GAIN = .9;
+let vol = clamp(parseInt(store.get("dacapo-vol"), 10), 0, 100); if (isNaN(vol)) vol = 50;
+const volGain = () => MAX_GAIN * vol / 100;
 let actx = null, master = null, analyser = null, cur = null, playToken = 0;
 const raw = new Map(), decoded = new Map();
 function ctx() {
   if (!actx) {
     const AC = window.AudioContext || window.webkitAudioContext;
     actx = new AC();
-    master = actx.createGain(); master.gain.value = .9;
+    master = actx.createGain(); master.gain.value = volGain();
     analyser = actx.createAnalyser(); analyser.fftSize = 256; analyser.smoothingTimeConstant = .78;
     master.connect(analyser); analyser.connect(actx.destination);
   }
@@ -831,6 +840,18 @@ function copyText(text) {
 }
 
 /* deck button & keyboard */
+{
+  const vEl = $("#vol"), vOut = $("#vol-v");
+  const showVol = () => { vEl.value = vol; vOut.textContent = vol; vEl.setAttribute("aria-valuetext", vol + " %"); };
+  showVol();
+  vEl.addEventListener("input", () => {
+    vol = clamp(parseInt(vEl.value, 10) || 0, 0, 100); showVol(); store.set("dacapo-vol", String(vol));
+    if (master && actx) {
+      const g = master.gain; g.cancelScheduledValues(actx.currentTime);
+      if (actx.state === "running") g.setTargetAtTime(volGain(), actx.currentTime, .03); else g.value = volGain();
+    }
+  });
+}
 $("#pp").addEventListener("click", () => {
   const p = G.rounds[G.i]; if (!p || G.phase === "end") return;
   if (cur) stopAudio(); else playClip(p.id, startTimerIfNeeded);
