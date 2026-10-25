@@ -165,7 +165,7 @@ body.flooded .deck-cap,body.flooded .play-bar .stat{color:rgb(255 255 255 / .85)
 .err{color:var(--bad);font-size:.95rem}
 
 /* dial */
-.dial-box{position:relative;width:min(84vw,24rem);max-width:100%}
+.dial-box{position:relative;width:min(84vw,24rem,max(16rem,calc(100vh - 27rem)));max-width:100%}
 #dial{width:100%;height:auto;display:block;touch-action:none;cursor:grab;outline:none}
 #dial:focus-visible{outline:2px solid var(--fg);outline-offset:6px;border-radius:50%}
 #dial.locked{cursor:default}
@@ -187,6 +187,15 @@ body.flooded .deck-cap,body.flooded .play-bar .stat{color:rgb(255 255 255 / .85)
 .truth-n{stroke:var(--fg);stroke-width:4;stroke-linecap:round}
 .truth-k{fill:var(--fg)}
 .gap-arc{fill:none;stroke:var(--fg);stroke-width:5;opacity:.4}
+.yr-top{display:flex;align-items:center;gap:1rem 1.6rem}
+.yr-top .dial-box{width:min(40vw,13.5rem);flex:none}
+.yr-top svg{width:100%;height:auto;display:block}
+.yr-top .d-lab{display:none}
+.yr-top .dial-center{top:47%}
+.yr-top .dial-center output{font-size:clamp(1.9rem,6vw,2.6rem)}
+.yr-top .dial-center span{font-size:10px;letter-spacing:.06em}
+.yr-score{display:grid;gap:.8rem;min-width:0}
+.yr-score .pts{font-size:clamp(3.2rem,9vw,5.2rem)}
 .legend{display:flex;justify-content:center;flex-wrap:wrap;gap:.3rem .9rem;font:500 12px var(--f-mono);letter-spacing:.04em;text-transform:uppercase;color:var(--fg-2)}
 .legend span{display:inline-flex;align-items:center;gap:.35rem}
 
@@ -374,6 +383,13 @@ const todayKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart
 const todayFR = today.toLocaleDateString("fr-FR", { day: "numeric", month: "long" });
 const dayOf = s => { const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(s || ""); return m ? Math.round((Date.UTC(+m[1], +m[2] - 1, +m[3]) - EPOCH) / DAY) + 1 : 1; };
 const dayNo = Math.max(1, dayOf(todayKey));
+/* ?defi=N plays challenge n°N again (today's or an earlier one), to test it or catch up on a missed day.
+   Only the first score of a challenge is kept. */
+const askDefi = parseInt(new URLSearchParams(location.search).get("defi"), 10);
+const defiNo = askDefi >= 1 && askDefi <= dayNo ? askDefi : dayNo, replay = defiNo === askDefi;
+const defiDate = new Date(EPOCH + (defiNo - 1) * DAY);
+const defiKey = defiNo === dayNo ? todayKey : defiDate.toISOString().slice(0, 10);
+const defiFR = defiNo === dayNo ? todayFR : defiDate.toLocaleDateString("fr-FR", { day: "numeric", month: "long", timeZone: "UTC" });
 const avail = (p, d) => p.addedDay <= d && (p.retiredDay == null || p.retiredDay > d);
 async function loadCatalog() {
   const r = await fetch("catalog.json", { cache: "no-cache" });
@@ -596,7 +612,7 @@ const playEl = $("#play"), homeEl = $("#home"), qEl = $("#q");
 
 function setFlood(e) { document.body.classList.remove("flooded", "e-B", "e-C", "e-R", "e-M"); if (e) document.body.classList.add("flooded", "e-" + e); vizColor = e ? "#ffffff" : ""; }
 function header() {
-  $("#p-mode").textContent = fr(G.mode === "daily" ? `Défi n°${dayNo}` : MODES[G.mode].name);
+  $("#p-mode").textContent = fr(G.mode === "daily" ? `Défi n°${defiNo}` : MODES[G.mode].name);
   $("#p-round").textContent = `${Math.min(G.i + 1, G.rounds.length)}/${G.rounds.length}`;
   $("#p-score").textContent = G.mode === "year" ? fmt(G.score, 2) : fmt(G.score);
 }
@@ -604,8 +620,8 @@ function startGame(mode) {
   if (!CAT_OK) return;
   ctx();
   G.mode = mode; G.i = 0; G.score = 0; G.res = []; G.newly = 0;
-  G.r = rng(mode === "daily" ? 1000003 * dayNo : Math.floor(Math.random() * 1e9));
-  G.rounds = mode === "daily" ? dailyRounds(dayNo) : pickRounds(MODES[mode].n, MODES[mode].filter, G.r);
+  G.r = rng(mode === "daily" ? 1000003 * defiNo : Math.floor(Math.random() * 1e9));
+  G.rounds = mode === "daily" ? dailyRounds(defiNo) : pickRounds(MODES[mode].n, MODES[mode].filter, G.r);
   if (!G.rounds.length) return;
   G.rounds.forEach(p => fetchRaw(p.id).catch(() => {}));
   homeEl.hidden = true; playEl.hidden = false; window.scrollTo(0, 0);
@@ -757,10 +773,9 @@ function yearReveal() {
   if (d > 0) sv("path", { d: arcD(150, Math.min(ag, at), Math.max(ag, at)), class: "gap-arc" }, revealG);
   const [x0, y0] = pol(92, at), [x1, y1] = pol(148, at); sv("line", { x1: x0, y1: y0, x2: x1, y2: y1, class: "truth-n" }, revealG);
   const [kx, ky] = pol(150, at); sv("circle", { cx: kx, cy: ky, r: 10, class: "truth-k" }, revealG);
-  const dialHTML = $(".dial-box", qEl).outerHTML;
-  revealView(p, `<p class="pts">${fmt(s, 2)}<small> / 10</small></p><div class="marks"><span class="mk">Vous : ${dialYear}</span><span class="mk">Réel : ${yearTxt(p)}</span><span class="mk ${d <= 10 ? "ok" : "no"}">Écart : ${d === 0 ? "aucun !" : d + " an" + (d > 1 ? "s" : "")}</span></div>`);
-  const box = document.createElement("div"); box.className = "deck"; box.innerHTML = dialHTML; qEl.insertBefore(box, qEl.firstChild);
-  $("#dial-year", box).textContent = p.y; $("#dial-sub", box).textContent = "année réelle";
+  const dialHTML = $(".dial-box", qEl).outerHTML.replace(' id="dial"', "").replace(' tabindex="0"', "").replace(' role="slider"', ' role="img"');
+  revealView(p, `<div class="yr-top">${dialHTML}<div class="yr-score"><p class="pts">${fmt(s, 2)}<small> / 10</small></p><div class="marks"><span class="mk">Vous : ${dialYear}</span><span class="mk">Réel : ${yearTxt(p)}</span><span class="mk ${d <= 10 ? "ok" : "no"}">Écart : ${d === 0 ? "aucun !" : d + " an" + (d > 1 ? "s" : "")}</span></div></div></div>`);
+  $(".yr-top #dial-year", qEl).textContent = p.y; $(".yr-top #dial-sub", qEl).textContent = "année réelle";
 }
 
 /* instrument */
@@ -804,7 +819,16 @@ function revealView(p, top) {
   qEl.innerHTML = fr(`<div class="reveal">${top}${cardHTML(p)}<div class="actions"><button class="btn solid" type="button" id="next">${last ? "Voir mon résultat" : "Extrait suivant →"}</button></div></div>`);
   $("#next").addEventListener("click", () => { if (last) endGame(); else { G.i++; round(); } });
   $("#next").focus({ preventScroll: true });
-  if (innerWidth < 860) $("#q").scrollIntoView({ behavior: RM ? "auto" : "smooth", block: "start" });
+  requestAnimationFrame(showNext);
+}
+/* After an answer: scroll just enough for the "next" button to be on screen, but never past the top of the answer. */
+function showNext() {
+  const n = $("#next"); if (!n) return;
+  const pad = 20, qTop = qEl.getBoundingClientRect().top + scrollY, nb = n.getBoundingClientRect().bottom + scrollY;
+  let y = scrollY;
+  if (innerWidth < 860) y = qTop - 12;                              // phone: the answer replaces the question
+  if (nb > y + innerHeight - pad) y = Math.min(nb - innerHeight + pad, qTop - 12);
+  if (Math.abs(y - scrollY) > 4) scrollTo({ top: Math.max(0, y), behavior: RM ? "auto" : "smooth" });
 }
 const MAX = { blind: 150, daily: 150, year: 10, inst: 100 };
 function verdict() {
@@ -817,9 +841,9 @@ function endGame() {
   const total = G.mode === "year" ? fmt(G.score, 2) : fmt(G.score);
   const key = "dacapo-best-" + (G.mode === "daily" ? "blind5" : G.mode);
   const prev = parseFloat(store.get(key)); if (isNaN(prev) || G.score > prev) store.set(key, G.score);
-  if (G.mode === "daily") store.set("dacapo-daily-" + todayKey, JSON.stringify({ s: G.score, q: G.res.map(r => r.sq), max }));
+  if (G.mode === "daily" && !store.get("dacapo-daily-" + defiKey)) store.set("dacapo-daily-" + defiKey, JSON.stringify({ s: G.score, q: G.res.map(r => r.sq), max }));
   const emo = ["", "🟩", "🟨", "🟥"];
-  const share = `Da capo · ${G.mode === "daily" ? `Défi n°${dayNo} (${todayFR})` : MODES[G.mode].name}\n${total} / ${fmt(max)} ${G.res.map(r => emo[r.sq]).join("")}`;
+  const share = `Da capo · ${G.mode === "daily" ? `Défi n°${defiNo} (${defiFR})` : MODES[G.mode].name}\n${total} / ${fmt(max)} ${G.res.map(r => emo[r.sq]).join("")}`;
   $("#p-round").textContent = "fin"; $("#deck-cap").textContent = "";
   qEl.innerHTML = fr(`<div class="reveal">
     <p class="eyebrow">Résultat</p>
@@ -877,15 +901,15 @@ function renderHome() {
   const real = P.filter(p => p.src).length, fresh = P.filter(p => p.addedDay > dayNo - 7 && p.addedDay > 1).length;
   const pl = (n, one, many) => `<b>${n}</b> ${n > 1 ? many : one}`;
   $("#fresh").innerHTML = fr(`<span>${pl(P.length, "extrait en jeu", "extraits en jeu")}</span>${real ? `<span>${pl(real, "enregistrement réel", "enregistrements réels")}</span>` : ""}${fresh ? `<span>${pl(fresh, "nouveau cette semaine", "nouveaux cette semaine")}</span>` : ""}`);
-  const daily = store.get("dacapo-daily-" + todayKey);
-  let d = null; try { d = daily ? JSON.parse(daily) : null; } catch (e) {}
+  const daily = store.get("dacapo-daily-" + defiKey);
+  let d = null; try { d = daily && !replay ? JSON.parse(daily) : null; } catch (e) {}
   const dmax = d && d.max ? d.max : 750;
   $("#daily").innerHTML = fr(d
-    ? `<p class="k">Défi n°${dayNo} · ${todayFR}</p><h2>${fmt(d.s)} / ${fmt(dmax)}</h2><p>${(d.q || []).map(x => emo[x]).join(" ")} · prochain défi demain à minuit.</p><button class="btn dark" type="button" id="daily-share">Copier</button>`
-    : `<p class="k">Défi n°${dayNo} · ${todayFR}</p><h2>Cinq extraits, les mêmes pour tous</h2><p>Un nouveau défi chaque jour à minuit.</p><button class="btn dark" type="button" id="daily-go">Jouer le défi</button>`);
+    ? `<p class="k">Défi n°${defiNo} · ${defiFR}</p><h2>${fmt(d.s)} / ${fmt(dmax)}</h2><p>${(d.q || []).map(x => emo[x]).join(" ")} · prochain défi demain à minuit.</p><button class="btn dark" type="button" id="daily-share">Copier</button>`
+    : `<p class="k">Défi n°${defiNo} · ${defiFR}</p><h2>Cinq extraits, les mêmes pour tous</h2><p>${replay && daily ? "Vous rejouez ce défi : seul votre premier score est conservé." : replay && defiNo < dayNo ? "Un défi passé, à rattraper." : "Un nouveau défi chaque jour à minuit."}</p><button class="btn dark" type="button" id="daily-go">Jouer le défi</button>`);
   const dg = $("#daily-go"); if (dg) dg.addEventListener("click", () => startGame("daily"));
   const ds = $("#daily-share"); if (ds) ds.addEventListener("click", () => {
-    const t = `Da capo · Défi n°${dayNo} (${todayFR})\n${fmt(d.s)} / ${fmt(dmax)} ${(d.q || []).map(x => emo[x]).join("")}`;
+    const t = `Da capo · Défi n°${defiNo} (${defiFR})\n${fmt(d.s)} / ${fmt(dmax)} ${(d.q || []).map(x => emo[x]).join("")}`;
     try { navigator.clipboard.writeText(t).then(() => { ds.textContent = "Copié !"; }, () => { ds.textContent = "Copie impossible"; }); } catch (e) { ds.textContent = "Copie impossible"; }
   });
   $$(".mode").forEach(b => { b.disabled = P.filter(MODES[b.dataset.mode].filter).length < MODES[b.dataset.mode].n; });
