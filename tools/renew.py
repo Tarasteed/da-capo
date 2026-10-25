@@ -419,7 +419,7 @@ def release(args):
              f"- {pl(n_active, 'extrait', 'extraits')} en jeu demain, {pl(len(q['items']), 'œuvre', 'œuvres')} en attente dans la file"]
     if skipped_hosts: lines.append(f"- Reporté à la semaine prochaine (serveur saturé) : {', '.join(sorted(skipped_hosts))}")
     if failed: lines += ["- Échecs :"] + [f"  - {f}" for f in failed]
-    if len(q["items"]) < 30: lines.append("- La file d’attente baisse : elle sera regarnie par la tâche Claude du dimanche.")
+    if len(q["items"]) < 30: lines.append("- La file d’attente baisse : elle sera regarnie par la tâche Claude du samedi.")
     text = "\n".join(lines)
     print(text)
     if os.environ.get("GITHUB_STEP_SUMMARY"):
@@ -501,6 +501,44 @@ def check(args):
     sys.exit(1 if errs else 0)
 
 
+def checkq(args):
+    """Validate queue.json against the catalogue before committing it; exit 1 on any error."""
+    c = json.load(open(args.catalog, encoding="utf-8"))
+    q = json.load(open(args.queue, encoding="utf-8"))
+    comps = {**c["composers"], **q.get("composers_add", {})}
+    cat_ids = {p["id"] for p in c["pieces"]}
+    cat_files = {(p.get("src") or {}).get("file") for p in c["pieces"]}
+    synth = {p["id"] for p in c["pieces"] if p.get("synth")}
+    errs, seen, files = [], set(), set()
+    for k, v in q.get("composers_add", {}).items():
+        if not (isinstance(v, list) and len(v) == 5 and isinstance(v[2], int) and isinstance(v[3], int) and v[4] in ("B", "C", "R", "M")):
+            errs.append(f"composers_add {k}: expected [full name, short name, birth, death, era B/C/R/M]")
+    for it in q.get("items", []):
+        pid = it.get("id", "")
+        if not re.fullmatch(r"[a-z0-9]+(-[a-z0-9]+)*", pid): errs.append(f"{pid!r}: id must be a lowercase ascii slug")
+        if pid in seen: errs.append(f"{pid}: duplicate id in queue")
+        if pid in cat_ids: errs.append(f"{pid}: id already used in catalog.json")
+        seen.add(pid)
+        for f in ("file", "url", "page", "licence", "licence_url"):
+            if not it.get(f): errs.append(f"{pid}: missing {f}")
+        if it.get("file") in cat_files: errs.append(f"{pid}: recording already in the catalogue ({it.get('file')})")
+        if it.get("file") in files: errs.append(f"{pid}: recording listed twice in the queue")
+        files.add(it.get("file"))
+        if not str(it.get("url", "")).startswith("https://"): errs.append(f"{pid}: url must be https")
+        if it.get("start") is not None and not isinstance(it["start"], (int, float)): errs.append(f"{pid}: start must be a number of seconds")
+        if it.get("replaces") and it["replaces"] not in synth: errs.append(f"{pid}: replaces {it['replaces']}, which is not a synthesized piece")
+        m = it.get("meta") or {}
+        for f in ("c", "t", "fact"):
+            if not m.get(f): errs.append(f"{pid}: meta.{f} missing")
+        if m.get("c") and m["c"] not in comps: errs.append(f"{pid}: unknown composer {m['c']} (add it to composers_add)")
+        if m.get("form") is not None and m["form"] not in FORMS: errs.append(f"{pid}: unknown form {m['form']}")
+        if m.get("y") is not None and not (isinstance(m["y"], int) and 1100 <= m["y"] <= 1990): errs.append(f"{pid}: implausible year {m.get('y')}")
+        if "<" in m.get("fact", "") or "<" in m.get("t", ""): errs.append(f"{pid}: no HTML in title or fact")
+    print(f"{len(q.get('items', []))} items in queue, {len(errs)} errors")
+    for e in errs: print("ERROR:", e)
+    sys.exit(1 if errs else 0)
+
+
 if __name__ == "__main__":
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -518,5 +556,7 @@ if __name__ == "__main__":
     r.add_argument("--audio-dir", default="audio")
     r.add_argument("--count", type=int, default=0, help="new excerpts per run (0 = 50 while under 100 real recordings, then 25)")
     r.add_argument("--cap", type=int, default=400)
+    cq = sub.add_parser("checkq", help="validate queue.json before committing it")
+    cq.add_argument("--catalog", default="catalog.json"); cq.add_argument("--queue", default="queue.json")
     a = ap.parse_args()
-    {"discover": discover, "fetch": fetch, "check": check, "merge": merge, "release": release}[a.cmd](a)
+    {"discover": discover, "fetch": fetch, "check": check, "merge": merge, "release": release, "checkq": checkq}[a.cmd](a)
